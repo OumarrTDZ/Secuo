@@ -1,0 +1,93 @@
+.create-space-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background-color: #f6fff8;
+    border-radius: 20px;
+    box-shadow: 0 6px 18px rgba(0, 100, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.create-space-container h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #2e7d32;
+}
+
+.space-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.space-form input,
+.space-form select,
+.space-form textarea {
+    padding: 0.8rem 1rem;
+    border: 1px solid #cce5cc;
+    border-radius: 12px;
+    background-color: #ffffff;
+    font-size: 1rem;
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+.space-form input:focus,
+.space-form select:focus,
+.space-form textarea:focus {
+    border-color: #81c784;
+    box-shadow: 0 0 0 2px rgba(129, 199, 132, 0.3);
+    outline: none;
+}
+
+.space-form label {
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.space-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.space-form .button-create-space {
+    background-color: #81c784;
+    color: white;
+    font-size: 1rem;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.space-form button:hover {
+    background-color: #10df19;
+}
+
+.message {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    border-radius: 10px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.message:empty {
+    display: none;
+}
+
+.back-button {
+    background-color: #040402;
+    color: #23aa85;
+    font-size: 1rem;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+
+.back-button:hover {
+    background-color: #b0bec5;
+}

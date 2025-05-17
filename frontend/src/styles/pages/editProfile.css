@@ -1,0 +1,94 @@
+.ep-wrapper {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ep-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.ep-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.ep-del-btn {
+    background: #ef5350;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.ep-del-btn:hover {
+    background: #d32f2f;
+}
+
+.ep-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.ep-form label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.ep-form input,
+.ep-form select {
+    padding: 0.65rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.ep-form input:focus,
+.ep-form select:focus {
+    outline: none;
+    border-color: #2ecc71;
+    box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.2);
+}
+
+.ep-save {
+    background: #2ecc71;
+    color: #fff;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.ep-save:hover {
+    background: #27ae60;
+}
+
+.ep-cancel {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #555;
+    text-decoration: underline;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+}
+

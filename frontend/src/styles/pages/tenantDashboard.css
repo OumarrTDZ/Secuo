@@ -1,0 +1,42 @@
+.dashboard-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--light-bg);
+    padding-top: 60px;
+    position: relative;
+}
+
+.sidebar-left {
+    width: 240px;
+    min-width: 240px;
+    background: white;
+    box-shadow: var(--shadow);
+    position: fixed;
+    top: 60px;
+    left: 0;
+    bottom: 0;
+    padding: 1rem;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.sidebar-right {
+    width: 260px;
+    min-width: 260px;
+    background: white;
+    box-shadow: var(--shadow);
+    position: fixed;
+    top: 60px;
+    right: 0;
+    bottom: 0;
+    padding: 1rem;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+.spaces-container {
+    margin-left: 240px;
+    margin-right: 260px;
+    padding: 2rem;
+    flex: 1;
+}

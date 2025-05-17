@@ -1,0 +1,85 @@
+.dropzone-container {
+    margin: 1rem 0;
+}
+
+.dropzone {
+    border: 2px dashed #81c784;
+    padding: 1.2rem;
+    border-radius: 12px;
+    background-color: #f6fff8;
+    color: #2e7d32;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.dropzone:hover {
+    background-color: #e8f5e9;
+    border-color: #66bb6a;
+}
+
+.preview-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.preview-item {
+    position: relative;
+    width: 100px;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.preview-content {
+    position: relative;
+}
+
+.preview-img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #cce5cc;
+    box-shadow: 0 2px 4px rgba(0, 100, 0, 0.1);
+}
+
+.preview-file {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    word-break: break-word;
+}
+
+.remove-btn {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: #e53935;
+    color: white;
+    border: none;
+    padding: 6px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: background-color 0.2s ease;
+}
+
+.remove-btn:hover {
+    background-color: #c62828;
+}
+
+.remove-btn i {
+    font-size: 1rem;
+}

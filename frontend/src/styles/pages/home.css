@@ -1,0 +1,110 @@
+.home-container {
+    font-family: 'Segoe UI', sans-serif;
+    color: #2d2d2d;
+    background-color: #ffffff;
+}
+
+.home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #eee;
+}
+
+.logo-area {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    width: 7vw;
+    height: 10vh;
+    margin-right: 10px;
+}
+
+.brand {
+    font-size: 1.5rem;
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.nav-links a {
+    margin-left: 20px;
+    text-decoration: none;
+    color: #2e7d32;
+    font-weight: 500;
+}
+
+.nav-links .register-btn {
+    background-color: #2e7d32;
+    padding: 6px 12px;
+    border-radius: 4px;
+    color: white;
+}
+
+
+.hero-section {
+    text-align: center;
+    padding: 3rem 2rem;
+    background-color: #f5fff5;
+}
+
+.hero-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    color: #2e7d32;
+}
+
+.hero-section p {
+    max-width: 600px;
+    margin: 0 auto 1.5rem;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.cta-btn {
+    background-color: #2e7d32;
+    color: white;
+    padding: 10px 20px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.cta-btn:hover {
+    background-color: #256429;
+}
+
+.features {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 2rem;
+    background-color: #fafafa;
+}
+
+.feature-box {
+    flex: 1;
+    max-width: 300px;
+    background-color: white;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.feature-box h3 {
+    color: #2e7d32;
+    margin-bottom: 0.5rem;
+}
+
+.footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #888;
+    border-top: 1px solid #eee;
+    margin-top: 2rem;
+}

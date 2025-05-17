@@ -1,0 +1,89 @@
+.owner-spaces-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.owner-spaces-container h1 {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: #2c3e50;
+}
+
+.owner-space-card {
+    background-color: #fdfdfd;
+    border: 1px solid #a2d5ab; /* verde claro, diferente del tenant */
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+    position: relative;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.owner-space-card:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px);
+}
+
+.owner-card-button-container {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+.owner-button {
+    background-color: #27ae60; /* verde para owner */
+    color: white;
+    font-size: 14px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.owner-button:hover {
+    background-color: #1e8449;
+}
+
+.owner-text {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #34495e;
+}
+
+.owner-subtext {
+    font-size: 14px;
+    color: #556b2f;
+    margin: 4px 0;
+}
+
+.owner-empty {
+    color: #999;
+    font-style: italic;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+
+.view-space-btn {
+    position: relative;
+    top: 15px;
+    right: 15px;
+    background-color: #a2b9f8;
+    color: white;
+    font-size: 14px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.view-space-btn:hover {
+    background-color: #187ecc;
+}
