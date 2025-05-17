@@ -1,0 +1,19 @@
+
+> dev
+> nodemon server.js
+
+[33m[nodemon] 3.1.10[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node server.js`[39m
+Server running on port 5000
+MongoDB connected successfully
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting child process[39m
+[32m[nodemon] starting `node server.js`[39m
+Server running on port 5000
+User connected: rmPeYO7br9up78cGAAAC
+User connected: C4uKabMjsBFUfQLRAAAD
+MongoDB connected successfully
+^C^C¨Desea terminar el trabajo por lotes (S/N)? 
