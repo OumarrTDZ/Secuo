@@ -72,7 +72,7 @@ const SpaceSchema = new mongoose.Schema({
         required: false
         // Sale price (if applicable)
     },
-    gallery: {
+    gallery: {//fix
         type: [{ url: String, description: String }],
         required: false
         // Array of images with URLs and optional descriptions

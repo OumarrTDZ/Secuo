@@ -1,6 +1,8 @@
 const express = require('express');
 const { authUser, authAdmin } = require('../middleware/authMiddleware');
+const { uploadContracts } = require('../utils/uploadContracts');
 const {
+    uploadFilesToContract,
     createContract,
     getContractById,
     updateContract,
@@ -13,8 +15,17 @@ const {
 
 const router = express.Router();
 
-// Create contract (owner or admin)
+// Create a contract (owner or admin)
 router.post('/', authUser, createContract);
+
+router.post(
+    '/:contractId/upload',
+    authUser,
+    uploadContracts.fields([
+        { name: 'contractDocument', maxCount: 10 }
+    ]),
+    uploadFilesToContract
+);
 
 // Get contracts for the logged-in owner
 router.get('/owner', authUser, getContractsByOwner);

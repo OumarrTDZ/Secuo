@@ -43,9 +43,12 @@ const SpaceDetails = () => {
                 <div className="section-header">
                     <h2>Associated Contracts</h2>
                 </div>
+                <Link to={`/contracts/new?spaceId=${space._id}`} className="add-contract-link">
+                    Add Contract
+                </Link>
 
                 {contracts.length === 0 ? (
-                    <p className="no-contracts">No contracts for this space.</p>
+                    <p className="new-contracts">No contracts for this space.</p>
                 ) : (
                     contracts.map((contract) => (
                         <div key={contract._id} className="contract">

@@ -10,6 +10,10 @@ const TenantSpaces = ({ user, rentedSpaces }) => {
         navigate(`/space/${spaceId}`);
     };
 
+    const handleReportSpace = (spaceId) => {
+        navigate(`/report/${spaceId}`);
+    };
+
     return (
         <div className="tenant-container">
             <h3 className="tenant-title">🏡 Rented Spaces</h3>
@@ -22,7 +26,13 @@ const TenantSpaces = ({ user, rentedSpaces }) => {
                                 className="view-space-btn"
                                 onClick={() => handleViewSpace(space._id)}
                             >
-                                View Details
+                                👁️
+                            </button>
+                            <button
+                                className="report-space-btn"
+                                onClick={() => handleReportSpace(space._id)}
+                            >
+                                ⚠️
                             </button>
                         </div>
 

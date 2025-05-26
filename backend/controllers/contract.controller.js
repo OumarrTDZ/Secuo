@@ -1,19 +1,47 @@
 const Contract = require('../models/Contract.model');
 const Space = require('../models/Space.model');
 const { isValidObjectId } = require('mongoose');
+const path = require('path');
 
 // Create a new contract (Owner or Admin)
 const createContract = async (req, res) => {
     try {
-        const { spaceId, tenantDni, contractType, startDate, endDate, monthlyPayment, initialPayment, contractDocument } = req.body;
+        const {
+            spaceId,
+            tenantDni,
+            contractType,
+            startDate,
+            endDate,
+            monthlyPayment,
+            initialPayment,
+            contractDocument
+        } = req.body;
 
+        // Check if the space exists
         const space = await Space.findById(spaceId);
-        if (!space) return res.status(404).json({ error: "Space not found" });
+        if (!space) {
+            return res.status(404).json({ error: "Space not found" });
+        }
 
+        // Only ADMIN or the space owner can create contracts
         if (req.user.role !== "ADMIN" && req.user.dni !== space.ownerDni) {
             return res.status(403).json({ error: "Unauthorized: Only the owner or admin can create contracts" });
         }
 
+        // Prevent duplicate contracts: check if a contract already exists
+        // for the same tenant and space, and is still active or upcoming
+        const existingContract = await Contract.findOne({
+            spaceId,
+            tenantDni,
+            endDate: { $gte: new Date() } // optional: only block active or future contracts
+        });
+
+        if (existingContract) {
+            return res.status(400).json({ error: "This tenant already has an active contract for this space" });
+        }
+
+
+        // Create and save the contract
         const contract = new Contract({
             spaceId,
             ownerDni: req.user.dni,
@@ -27,6 +55,7 @@ const createContract = async (req, res) => {
         });
 
         await contract.save();
+
         res.status(201).json({ message: "Contract created successfully", contract });
 
     } catch (error) {
@@ -34,6 +63,7 @@ const createContract = async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 };
+
 
 // Get contract by ID (Owner, tenant or Admin)
 const getContractById = async (req, res) => {
@@ -179,7 +209,34 @@ const validateContract = async (req, res) => {
     }
 };
 
+/**
+ * Upload contract document images to /uploads/contracts/{contractId}
+ */
+const uploadFilesToContract = async (req, res) => {
+    try {
+        const { contractId } = req.params;
+
+        const contract = await Contract.findById(contractId);
+        if (!contract) return res.status(404).json({ error: 'Contract not found' });
+
+        if (req.files?.contractDocument) {
+            contract.contractDocument = req.files.contractDocument.map(file =>
+                `/uploads/contracts/${contractId}/contractDocument/${file.filename}`
+            );
+        }
+
+        await contract.validate();
+        await contract.save();
+
+        res.json({ message: 'Contract documents uploaded successfully', contract });
+    } catch (error) {
+        console.error("Error uploading contract documents:", error);
+        res.status(500).json({ error: 'Error saving contract with uploaded documents' });
+    }
+};
+
 module.exports = {
+    uploadFilesToContract,
     createContract,
     getContractById,
     updateContract,
