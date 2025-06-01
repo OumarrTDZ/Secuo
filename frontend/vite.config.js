@@ -11,5 +11,13 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
+  },
+  resolve: {
+    alias: {
+      'jquery': 'jquery/dist/jquery.min.js',
+    }
+  },
+  optimizeDeps: {
+    include: ['jquery']
   }
 });

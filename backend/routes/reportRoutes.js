@@ -1,20 +1,34 @@
 const express = require('express');
 const { authUser } = require('../middleware/authMiddleware');
-const { getReports, getReportById, updateReport } = require('../controllers/report.controller');
+const { uploadReportImages } = require('../utils/uploadReports');
+const {
+    getReports,
+    getReportById,
+    updateReport,
+    createReport,
+    uploadFilesToReport
+} = require('../controllers/report.controller');
 
 const router = express.Router();
 
-// Obtener reportes:
-// 🔒 Admins ven todos los reportes,
-// 🔒 Propietarios solo los de sus espacios
+// Create a new report with optional image attachments
+router.post('/', authUser, createReport);
+
+// Upload images to an existing report
+router.post(
+    '/:reportId/images',
+    authUser,
+    uploadReportImages.array('images', 5),
+    uploadFilesToReport
+);
+
+// Get all reports: Admins see all, owners see reports of their spaces
 router.get('/', authUser, getReports);
 
-// Obtener detalle de un reporte:
-// 🔒 Inquilino que reporta, propietario del espacio o admin pueden acceder
+// Get a specific report: Only the reporting tenant, the space owner, or an admin can view it
 router.get('/:id', authUser, getReportById);
 
-// Modificar reporte:
-// 🔒 Solo el inquilino que creó el reporte puede actualizarlo
+// Update a report: Only the tenant who created it can update
 router.patch('/:id', authUser, updateReport);
 
 module.exports = router;

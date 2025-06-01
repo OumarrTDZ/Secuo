@@ -51,10 +51,11 @@ const SpaceSchema = new mongoose.Schema({
         default: "AVAILABLE"
         // Current status of the space
     },
-    validationDocument: {
-        type: String,
-        required: false
-        // Path or URL of validation document
+    validationDocuments: {
+        type: [String],
+        required: false,
+        default: []
+        // Array of paths or URLs of validation documents
     },
     validationStatus: {
         type: String,
@@ -72,9 +73,10 @@ const SpaceSchema = new mongoose.Schema({
         required: false
         // Sale price (if applicable)
     },
-    gallery: {//fix
+    gallery: {
         type: [{ url: String, description: String }],
-        required: false
+        required: false,
+        default: []
         // Array of images with URLs and optional descriptions
     }
 }, { timestamps: true });

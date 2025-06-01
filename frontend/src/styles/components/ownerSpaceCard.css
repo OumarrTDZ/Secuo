@@ -1,8 +1,12 @@
+/* Owner Spaces Container */
 .owner-spaces-container {
-    width: 100%;
-    max-width: 1000px;
+    width: 95%;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .owner-spaces-container h1 {
@@ -10,80 +14,463 @@
     font-weight: bold;
     margin-bottom: 16px;
     color: #2c3e50;
+    text-align: center;
+    width: 100%;
 }
 
+/* Owner Space Card */
 .owner-space-card {
-    background-color: #fdfdfd;
-    border: 1px solid #a2d5ab; /* verde claro, diferente del tenant */
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 16px;
     position: relative;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin: 24px auto;
+    padding: 16px;
 }
 
 .owner-space-card:hover {
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-    transform: translateY(-3px);
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.owner-card-button-container {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-}
-
-.owner-button {
-    background-color: #27ae60; /* verde para owner */
-    color: white;
-    font-size: 14px;
-    padding: 8px 16px;
-    border: none;
+/* Carousel Container */
+.carousel-container {
+    width: 350px;
+    min-width: 350px;
+    height: 250px;
     border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.owner-button:hover {
-    background-color: #1e8449;
-}
-
-.owner-text {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: #34495e;
-}
-
-.owner-subtext {
-    font-size: 14px;
-    color: #556b2f;
-    margin: 4px 0;
-}
-
-.owner-empty {
-    color: #999;
-    font-style: italic;
-    text-align: center;
-    padding: 1rem 0;
-}
-
-
-.view-space-btn {
+    overflow: hidden;
     position: relative;
-    top: 15px;
-    right: 15px;
-    background-color: #a2b9f8;
-    color: white;
-    font-size: 14px;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
 }
 
-.view-space-btn:hover {
-    background-color: #187ecc;
+/* Carousel Image */
+.carousel-slide {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+
+.carousel-slide.error {
+    object-fit: contain;
+    padding: 20px;
+    margin: auto;
+}
+
+/* Space Details */
+.space-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 16px;
+    min-height: 250px;
+}
+
+/* Header Section */
+.space-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.space-type {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.space-type h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.space-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #4a5568;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Info Section */
+.space-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #4a5568;
+    font-size: 16px;
+}
+
+.space-price {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.price-value {
+    font-size: 24px;
+    color: #047857;
+    font-weight: 600;
+}
+
+.price-label {
+    font-size: 14px;
+    color: #718096;
+}
+
+/* Status Section */
+.space-status {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.status-label {
+    font-size: 14px;
+    color: #718096;
+}
+
+.status-value {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 16px;
+}
+
+.status-value.available {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+.status-value.occupied {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.status-value.maintenance {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.validation-status {
+    font-size: 14px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 16px;
+}
+
+.validation-status.approved {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.validation-status.rejected {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.validation-status.pending {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+/* Meta Information */
+.space-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.contracts-info, .space-id {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contracts-info .meta-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.contracts-info .icon {
+    color: #64748b;
+}
+
+.meta-label {
+    font-size: 14px;
+    color: #718096;
+}
+
+.meta-value {
+    font-size: 14px;
+    color: #2d3748;
+    font-weight: 500;
+}
+
+.meta-value.contracts-count {
+    background-color: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 16px;
+    color: #475569;
+    font-size: 13px;
+}
+
+.meta-value.id {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 13px;
+    color: #94a3b8;
+    letter-spacing: -0.5px;
+}
+
+.icon {
+    width: 18px;
+    height: 18px;
+    color: #64748b;
+}
+
+/* Status Classes */
+.owner-space-card.approved {
+    border-left: 4px solid #4CAF50;
+}
+
+.owner-space-card.rejected {
+    border-left: 4px solid #f44336;
+}
+
+.owner-space-card.pending {
+    border-left: 4px solid #ff9800;
+}
+
+/* Action Buttons */
+.space-actions {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    display: flex;
+    gap: 8px;
+    z-index: 2;
+}
+
+.view-space-btn,
+.edit-space-btn {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #2c3e50;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.view-space-btn:hover,
+.edit-space-btn:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.view-space-btn svg,
+.edit-space-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Status Badges */
+.validation-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-top: 8px;
+}
+
+.approved .validation-status {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.rejected .validation-status {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.pending .validation-status {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}
+
+/* Tenant Information */
+.tenant-subtext {
+    font-size: 13px;
+    color: #64748b;
+    font-style: italic;
+}
+
+/* Empty State */
+.empty-gallery {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #f8f9fa;
+    color: #94a3b8;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px;
+}
+
+/* Loading State */
+.loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: #f8f9fa;
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #47ca61;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .owner-space-card {
+        flex-direction: column;
+        gap: 16px;
+        padding: 12px;
+    }
+
+    .carousel-container {
+        width: 100%;
+        min-width: 100%;
+        height: 280px;
+    }
+
+    .space-actions {
+        top: 20px;
+        right: 20px;
+    }
+
+    .space-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .space-price {
+        margin-top: 8px;
+    }
+}
+
+/* Image Navigation */
+.carousel-nav {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 2;
+}
+
+.carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.carousel-dot.active {
+    background: white;
+    transform: scale(1.2);
+}
+
+/* Navigation Buttons */
+.carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 2;
+}
+
+.carousel-button.prev {
+    left: 12px;
+}
+
+.carousel-button.next {
+    right: 12px;
+}
+
+.carousel-button:hover {
+    background: white;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-button svg {
+    width: 20px;
+    height: 20px;
+    color: #2c3e50;
 }

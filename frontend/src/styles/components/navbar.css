@@ -4,47 +4,62 @@
     align-items: center;
     background-color: #47ca61;
     color: white;
-    padding: 10px 20px;
-    font-family: sans-serif;
-    height: 6vh;
+    padding: 0 20px;
+    height: 60px;
+    min-height: 60px;
+    width: 100%;
+    position: relative;
+    z-index: 10;
 }
 
 .navbar-left {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
 }
 
 .avatar {
-    width: 30px;
-    height: 30px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background-color: #333;
+    background-color: rgba(255, 255, 255, 0.2);
     display: flex;
     justify-content: center;
     align-items: center;
     font-weight: bold;
-    font-size: 16px;
     color: white;
-    border: 1px solid white;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+}
+
+.avatar svg {
+    width: 20px;
+    height: 20px;
+}
+
+.avatar:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
 }
 
 .welcome {
     font-size: 16px;
+    font-weight: 500;
+    color: white;
 }
 
 .navbar-right {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
 }
 
 /* Switch style */
 .switch {
     position: relative;
     display: inline-block;
-    width: 40px;
-    height: 20px;
+    width: 50px;
+    height: 24px;
 }
 
 .switch input {
@@ -60,31 +75,32 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #ccc;
+    background-color: rgba(255, 255, 255, 0.3);
     transition: 0.4s;
-    border-radius: 20px;
+    border-radius: 24px;
 }
 
 .slider:before {
     position: absolute;
     content: "";
-    height: 16px;
-    width: 16px;
+    height: 20px;
+    width: 20px;
     left: 2px;
     bottom: 2px;
-    background-color: black;
+    background-color: white;
     transition: 0.4s;
     border-radius: 50%;
 }
 
 input:checked + .slider {
-    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.8);
 }
 
 input:checked + .slider:before {
-    transform: translateX(20px);
+    transform: translateX(26px);
 }
 
 .logo {
-    height: 30px;
+    height: 36px;
+    width: auto;
 }

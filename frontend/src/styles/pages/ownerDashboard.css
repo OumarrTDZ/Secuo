@@ -38,14 +38,132 @@
     overflow-y: auto;
 }
 
-.owner-spaces-container h1 {
-    font-size: 2rem;
-    margin-bottom: 30px;
+/* Header Section */
+.owner-header {
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 32px;
+    padding: 32px;
+    min-height: 100px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.owner-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 28px;
     font-weight: 700;
-    color: var(--text-color);
+    color: #1e293b;
+}
+
+.title-icon {
+    width: 32px;
+    height: 32px;
+    color: #47ca61;
+}
+
+/* Add Space Button */
+.add-space-button {
+    position: absolute;
+    right: 32px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    height: fit-content;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #47ca61 0%, #3db554 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(71, 202, 97, 0.2);
+    white-space: nowrap;
+}
+
+.add-space-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(71, 202, 97, 0.3);
+    background: linear-gradient(135deg, #3db554 0%, #47ca61 100%);
+}
+
+.add-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.add-space-button:hover .add-icon {
+    transform: rotate(90deg);
+}
+
+/* No Spaces Message */
+.no-spaces-message {
+    text-align: center;
+    padding: 48px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin: 32px auto;
+    max-width: 500px;
+}
+
+.no-spaces-icon {
+    width: 48px;
+    height: 48px;
+    color: #3b82f6;
+    margin-bottom: 16px;
+}
+
+.no-spaces-message h3 {
+    font-size: 24px;
+    color: #1e293b;
+    margin-bottom: 8px;
+}
+
+.no-spaces-message p {
+    font-size: 16px;
+    color: #64748b;
+    margin-bottom: 24px;
+}
+
+.add-first-space-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+}
+
+.add-first-space-button:hover {
+    background-color: #2563eb;
+    transform: scale(1.05);
 }
 
 @media (max-width: 1024px) {
+    .owner-header {
+        flex-direction: row;
+        align-items: center;
+        gap: 16px;
+    }
+
     .sidebar-left,
     .sidebar-right {
         width: 15%;
@@ -72,11 +190,52 @@
         margin: 0;
         padding: 20px 5%;
     }
-}
 
-.add-space-button{
-    border: 5px solid #2aa551;
-    border-radius: 5px;
-    background-color: #6ffd9e;
-    padding: 5px 5%;
+    .owner-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .owner-title {
+        font-size: 24px;
+    }
+
+    .title-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .no-spaces-message {
+        padding: 32px 20px;
+    }
+
+    .no-spaces-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .no-spaces-message h3 {
+        font-size: 20px;
+    }
+
+    .no-spaces-message p {
+        font-size: 14px;
+    }
+
+    .add-first-space-button {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    .add-space-button {
+        position: static;
+        transform: none;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .add-space-button:hover {
+        transform: translateY(-2px);
+    }
 }

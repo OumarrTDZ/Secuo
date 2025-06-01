@@ -2,6 +2,52 @@ const Report = require('../models/Report.model');
 const Space = require('../models/Space.model');
 const { isValidObjectId } = require('mongoose');
 
+// Create a new report with optional attachments
+const createReport = async (req, res) => {
+    try {
+        const { description, priority, issueType, spaceId } = req.body;
+
+        const space = await Space.findById(spaceId);
+        if (!space) return res.status(404).json({ error: 'Space not found' });
+
+        const report = new Report({
+            description,
+            priority,
+            issueType,
+            spaceId,
+            tenantDni: req.user.dni
+        });
+
+        await report.save();
+        res.status(201).json({ message: 'Report created successfully', report });
+    } catch (error) {
+        console.error('Error creating report:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Subir archivos del reporte
+const uploadFilesToReport = async (req, res) => {
+    try {
+        const { reportId } = req.params;
+
+        const report = await Report.findById(reportId);
+        if (!report) return res.status(404).json({ error: 'Report not found' });
+
+        if (req.files?.attachments) {
+            report.attachments = req.files.attachments.map(file =>
+                `/uploads/${report.spaceId}/reports/${reportId}/${file.filename}`
+            );
+        }
+
+        await report.save();
+        res.json({ message: 'Report files uploaded successfully', report });
+    } catch (error) {
+        console.error('Error uploading report files:', error);
+        res.status(500).json({ error: 'Failed to upload images' });
+    }
+};
+
 // Check if user is owner of the space
 const isOwner = async (ownerDni, spaceId) => {
     if (!isValidObjectId(spaceId)) return false;
@@ -88,4 +134,4 @@ const updateReport = async (req, res) => {
     }
 };
 
-module.exports = { getReports, getReportById, updateReport, isOwner, isTenant };
+module.exports = {createReport,uploadFilesToReport, getReports, getReportById, updateReport, isOwner, isTenant };

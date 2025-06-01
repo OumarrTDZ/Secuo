@@ -34,14 +34,31 @@ const getSpaces = async (req, res) => {
  */
 const getSpaceById = async (req, res) => {
     try {
-        const { id } = req.params;
-        const space = await Space.findById(id);
-        if (!space) return res.status(404).json({ error: "Space not found" });
+        console.log('1. Backend: Recibida petición getSpaceById');
+        console.log('2. Backend: Parámetros:', {
+            id: req.params.id,
+            headers: req.headers,
+            user: req.user
+        });
 
+        const { id } = req.params;
+        console.log('3. Backend: Buscando espacio con ID:', id);
+        const space = await Space.findById(id);
+        
+        if (!space) {
+            console.log('4. Backend: Espacio no encontrado');
+            return res.status(404).json({ error: "Space not found" });
+        }
+        
+        console.log('5. Backend: Espacio encontrado:', space);
+        console.log('6. Backend: Buscando contratos para el espacio');
         const contracts = await Contract.find({ spaceId: id });
+        console.log('7. Backend: Contratos encontrados:', contracts.length);
+
+        console.log('8. Backend: Enviando respuesta');
         res.json({ space, contracts });
     } catch (error) {
-        console.error("Error getting space:", error);
+        console.error('9. Backend: Error en getSpaceById:', error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
@@ -104,19 +121,38 @@ const deleteSpace = async (req, res) => {
  */
 const validateSpace = async (req, res) => {
     try {
-        const space = await Space.findById(req.params.id);
-        if (!space) return res.status(404).json({ error: "Space not found." });
+        const { id } = req.params;
+        const { validationStatus } = req.body;
 
-        space.validationStatus = req.body.validationStatus;
+        const space = await Space.findById(id);
+        if (!space) {
+            return res.status(404).json({ error: 'Space not found' });
+        }
+
+        space.validationStatus = validationStatus;
         await space.save();
 
-        res.json({
-            message: `Space ${req.body.validationStatus === "APPROVED" ? "approved" : "rejected"}`,
-            space
-        });
+        // Send notification to the space owner
+        const io = req.app.get('io');
+        if (io) {
+            const title = validationStatus === 'APPROVED' ? 'Space Approved!' : 'Space Rejected';
+            const message = validationStatus === 'APPROVED' 
+                ? `Your space ${space.spaceType} has been approved.`
+                : `Your space ${space.spaceType} has been rejected.`;
+            
+            await io.notifyUser(
+                space.ownerDni,
+                validationStatus === 'APPROVED' ? 'SPACE_APPROVED' : 'SPACE_REJECTED',
+                title,
+                message,
+                space._id
+            );
+        }
+
+        res.json({ message: 'Space validation status updated successfully', space });
     } catch (error) {
-        console.error("Error validating space:", error);
-        res.status(500).json({ error: "Internal server error." });
+        console.error('Error validating space:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -134,7 +170,7 @@ const getPendingSpaces = async (req, res) => {
 };
 
 /**
- * Upload files (gallery and validation document) for a space
+ * Upload files (gallery and validation documents) for a space
  */
 const uploadFilesToSpace = async (req, res) => {
     try {
@@ -144,13 +180,15 @@ const uploadFilesToSpace = async (req, res) => {
 
         if (req.files?.gallery) {
             space.gallery = req.files.gallery.map(file => ({
-                url: `/uploads/${spaceId}/gallery/${file.filename}`,
+                url: `/uploads/spaces/${spaceId}/gallery/${file.filename}`,
                 description: ''
             }));
         }
 
-        if (req.files.validationDocument) {
-            space.validationDocument = `/uploads/${spaceId}/validationDocument/${req.files.validationDocument[0].filename}`;
+        if (req.files?.validationDocuments) {
+            space.validationDocuments = req.files.validationDocuments.map(file => 
+                `/uploads/spaces/${spaceId}/validationDocument/${file.filename}`
+            );
         }
 
         await space.validate();

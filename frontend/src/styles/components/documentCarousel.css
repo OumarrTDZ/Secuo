@@ -1,0 +1,191 @@
+.document-carousel-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.document-swiper {
+    width: 100%;
+    height: 400px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.document-item {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.document-item:hover {
+    transform: scale(1.02);
+}
+
+.document-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.document-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.document-item:hover .document-overlay {
+    opacity: 1;
+}
+
+.document-overlay span {
+    color: white;
+    font-size: 1.2em;
+    padding: 10px 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+}
+
+/* Estilos para documentos no-imagen */
+.document-download {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+}
+
+.document-icon {
+    font-size: 4em;
+    margin-bottom: 15px;
+}
+
+.document-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.document-type {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.download-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.download-button:hover {
+    background-color: #0056b3;
+}
+
+.no-docs-placeholder {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    color: #666;
+    font-size: 1.1em;
+}
+
+/* Fullscreen styles */
+.fullscreen-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.fullscreen-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+}
+
+.fullscreen-document {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.close-fullscreen {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 2em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+.close-fullscreen:hover {
+    transform: scale(1.1);
+}
+
+/* Swiper navigation customization */
+.document-swiper .swiper-button-next,
+.document-swiper .swiper-button-prev {
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.document-swiper .swiper-button-next:after,
+.document-swiper .swiper-button-prev:after {
+    font-size: 20px;
+}
+
+.document-swiper .swiper-pagination-bullet {
+    background: #fff;
+    opacity: 0.5;
+}
+
+.document-swiper .swiper-pagination-bullet-active {
+    opacity: 1;
+} 

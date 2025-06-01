@@ -2,6 +2,7 @@ const Contract = require('../models/Contract.model');
 const Space = require('../models/Space.model');
 const { isValidObjectId } = require('mongoose');
 const path = require('path');
+const fs = require('fs');
 
 // Create a new contract (Owner or Admin)
 const createContract = async (req, res) => {
@@ -57,7 +58,6 @@ const createContract = async (req, res) => {
         await contract.save();
 
         res.status(201).json({ message: "Contract created successfully", contract });
-
     } catch (error) {
         console.error("Error creating contract:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -91,45 +91,54 @@ const getContractById = async (req, res) => {
 const updateContract = async (req, res) => {
     try {
         const { id } = req.params;
-        if (!isValidObjectId(id)) {
-            return res.status(400).json({ error: "Invalid ID format" });
-        }
+        const updates = req.body;
 
-        const contract = await Contract.findById(id);
-        if (!contract) return res.status(404).json({ error: "Contract not found" });
-
-        if (req.user.role !== "ADMIN" && req.user.dni !== contract.ownerDni) {
-            return res.status(403).json({ error: "Unauthorized: Only the owner or admin can modify this contract" });
-        }
-
-        const { contractType, startDate, endDate, monthlyPayment, contractStatus } = req.body;
-
-        if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
-            return res.status(400).json({ error: "Start date must be before end date" });
-        }
-
-        if (monthlyPayment !== undefined && monthlyPayment < 0) {
-            return res.status(400).json({ error: "Monthly payment must be positive" });
-        }
-
-        const allowedStatuses = ["ACTIVE", "INACTIVE", "TERMINATED"];
-        if (contractStatus && !allowedStatuses.includes(contractStatus)) {
-            return res.status(400).json({ error: "Invalid contract status" });
-        }
-
-        const allowedFields = ['contractType', 'startDate', 'endDate', 'monthlyPayment', 'contractStatus'];
-        allowedFields.forEach(field => {
-            if (req.body[field] !== undefined) {
-                contract[field] = req.body[field];
+        // If there's a document to delete
+        if (updates.documentToDelete) {
+            const contract = await Contract.findById(id);
+            if (!contract) {
+                return res.status(404).json({ message: 'Contract not found' });
             }
-        });
 
-        await contract.save();
-        res.json({ message: "Contract updated successfully", contract });
+            // Find the document index
+            const documentIndex = contract.contractDocument.findIndex(doc => 
+                doc.includes(updates.documentToDelete)
+            );
 
+            if (documentIndex === -1) {
+                return res.status(404).json({ message: 'Document not found' });
+            }
+
+            // Get the document path and remove from array
+            const documentPath = contract.contractDocument[documentIndex];
+            contract.contractDocument.splice(documentIndex, 1);
+
+            // Delete the physical file
+            const filePath = path.join(__dirname, '..', documentPath);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+
+            // Save the contract
+            await contract.save();
+            return res.json({ message: 'Document deleted successfully' });
+        }
+
+        // Regular contract update
+        const contract = await Contract.findByIdAndUpdate(
+            id,
+            updates,
+            { new: true }
+        );
+
+        if (!contract) {
+            return res.status(404).json({ message: 'Contract not found' });
+        }
+
+        res.json(contract);
     } catch (error) {
-        console.error("Error updating contract:", error);
-        res.status(500).json({ error: "Internal server error" });
+        console.error('Error updating contract:', error);
+        res.status(500).json({ message: 'Error updating contract' });
     }
 };
 
@@ -193,19 +202,48 @@ const getPendingContracts = async (req, res) => {
 // Approve or reject a contract
 const validateContract = async (req, res) => {
     try {
-        const contract = await Contract.findById(req.params.id);
-        if (!contract) return res.status(404).json({ error: "Contract not found." });
+        const { id } = req.params;
+        const { validationStatus } = req.body;
 
-        contract.validationStatus = req.body.validationStatus;
+        const contract = await Contract.findById(id);
+        if (!contract) {
+            return res.status(404).json({ error: 'Contract not found' });
+        }
+
+        contract.validationStatus = validationStatus;
         await contract.save();
 
-        res.json({
-            message: `Contract ${req.body.validationStatus === "APPROVED" ? "approved" : "rejected"}`,
-            contract
-        });
+        // Send notification to both owner and tenant
+        const io = req.app.get('io');
+        if (io) {
+            const title = validationStatus === 'APPROVED' ? 'Contract Approved!' : 'Contract Rejected';
+            const message = validationStatus === 'APPROVED' 
+                ? `Your contract has been approved.`
+                : `Your contract has been rejected.`;
+            
+            // Notify owner
+            await io.notifyUser(
+                contract.ownerDni,
+                validationStatus === 'APPROVED' ? 'CONTRACT_APPROVED' : 'CONTRACT_REJECTED',
+                title,
+                message,
+                contract._id
+            );
+
+            // Notify tenant
+            await io.notifyUser(
+                contract.tenantDni,
+                validationStatus === 'APPROVED' ? 'CONTRACT_APPROVED' : 'CONTRACT_REJECTED',
+                title,
+                message,
+                contract._id
+            );
+        }
+
+        res.json({ message: 'Contract validation status updated successfully', contract });
     } catch (error) {
-        console.error("Error validating contract:", error);
-        res.status(500).json({ error: "Internal server error" });
+        console.error('Error validating contract:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -220,9 +258,10 @@ const uploadFilesToContract = async (req, res) => {
         if (!contract) return res.status(404).json({ error: 'Contract not found' });
 
         if (req.files?.contractDocument) {
-            contract.contractDocument = req.files.contractDocument.map(file =>
-                `/uploads/contracts/${contractId}/contractDocument/${file.filename}`
-            );
+            contract.contractDocument = req.files.contractDocument.map(file => ({
+                path: `/uploads/contracts/${contractId}/contractDocument/${file.filename}`,
+                originalName: file.originalname
+            }));
         }
 
         await contract.validate();

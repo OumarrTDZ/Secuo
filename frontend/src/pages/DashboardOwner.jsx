@@ -1,13 +1,9 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-import Navbar from "../components/Navbar.jsx";
-import SidebarLeft from "../components/SidebarLeft.jsx";
-import SidebarRight from "../components/SidebarRight.jsx";
 import OwnerSpaceCard from "../components/OwnerSpaceCard.jsx";
-
 import "../styles/pages/ownerDashboard.css";
+import { FiPlus, FiHome } from 'react-icons/fi';
 
 const DashboardOwner = () => {
     const [user, setUser] = useState(null);
@@ -18,7 +14,6 @@ const DashboardOwner = () => {
     const fetchOwnerData = async () => {
         const token = localStorage.getItem("userToken");
         if (!token) {
-            alert("Access denied.");
             navigate("/login");
             return;
         }
@@ -41,30 +36,44 @@ const DashboardOwner = () => {
         fetchOwnerData();
     }, []);
 
-    const handleCreateSpace = () => {
-        navigate("/create-space");
-    };
-
     if (loading) return <p>Loading spaces...</p>;
 
     return (
-        <div className="dashboard-wrapper">
-            <SidebarLeft />
-            <div className="spaces-container">
-                <div className="grid">
-                    {ownedSpaces.length > 0 ? (
-                        ownedSpaces.map(space => (
-                            <OwnerSpaceCard key={space._id} space={space} />
-                        ))
-                    ) : (
-                        <p>You have no available spaces.</p>
-                    )}
-                </div>
-                <button onClick={handleCreateSpace} className="add-space-button">
-                    Add Space
+        <div className="spaces-container">
+            <div className="owner-header">
+                <h3 className="owner-title">
+                    <FiHome className="title-icon" /> My Spaces
+                </h3>
+                <button 
+                    className="add-space-button"
+                    onClick={() => navigate("/create-space")}
+                    aria-label="Add new space"
+                >
+                    <FiPlus className="add-icon" />
+                    Add New Space
                 </button>
             </div>
-            <SidebarRight user={user} reloadUser={fetchOwnerData} />
+
+            <div className="grid">
+                {ownedSpaces.length > 0 ? (
+                    ownedSpaces.map(space => (
+                        <OwnerSpaceCard key={space._id} space={space} />
+                    ))
+                ) : (
+                    <div className="no-spaces-message">
+                        <FiHome className="no-spaces-icon" />
+                        <h3>No Spaces Available</h3>
+                        <p>Start by adding your first rental space!</p>
+                        <button 
+                            className="add-first-space-button"
+                            onClick={() => navigate("/create-space")}
+                        >
+                            <FiPlus className="add-icon" />
+                            Add Your First Space
+                        </button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

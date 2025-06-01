@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { documentFileFilter } = require('./fileValidation');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -16,7 +17,7 @@ const storage = multer.diskStorage({
                 subfolder = 'contractDocument';
                 break;
             default:
-                subfolder = 'misc';
+                return cb(new Error('Invalid field name'));
         }
 
         const uploadPath = path.join(__dirname, '..', 'uploads', 'contracts', contractId, subfolder);
@@ -38,6 +39,9 @@ const storage = multer.diskStorage({
     }
 });
 
-const uploadContracts = multer({ storage });
+const uploadContracts = multer({ 
+    storage,
+    fileFilter: documentFileFilter
+});
 
 module.exports = { uploadContracts };

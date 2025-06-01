@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import ReusableDropzone from "../components/ReusableDropzone";
-import "../styles/pages/editProfile.css";
+import "../styles/components/forms.css";
 import { Link, useNavigate } from "react-router-dom";
 
 const EditProfile = () => {
@@ -20,6 +20,7 @@ const EditProfile = () => {
     const [newProfile, setNewProfile] = useState(null);
     const [newDniFront, setNewDniFront] = useState(null);
     const [newDniBack, setNewDniBack] = useState(null);
+    const [message, setMessage] = useState('');
 
     // Fetch user profile on component mount
     useEffect(() => {
@@ -40,6 +41,7 @@ const EditProfile = () => {
                 });
             } catch (error) {
                 console.error(error);
+                setMessage("Error fetching profile data.");
             } finally {
                 setLoading(false);
             }
@@ -77,113 +79,171 @@ const EditProfile = () => {
     // Save profile changes, including optional image uploads
     const handleSave = async (e) => {
         e.preventDefault();
-
-        const token = localStorage.getItem("userToken");
         try {
-            // Update user data
-            await axios.patch(
-                `http://localhost:5000/api/users/${user._id}/edit`,
-                form,
-                { headers: { Authorization: `Bearer ${token}` } }
+            const token = localStorage.getItem("userToken");
+            const formData = new FormData();
+
+            // Append basic form data
+            Object.keys(form).forEach(key => {
+                formData.append(key, form[key]);
+            });
+
+            // Append new photos if they exist
+            if (newProfile) formData.append('profilePhoto', newProfile);
+            if (newDniFront) formData.append('idFrontPhoto', newDniFront);
+            if (newDniBack) formData.append('idBackPhoto', newDniBack);
+
+            await axios.put(
+                "http://localhost:5000/api/users/profile",
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
             );
 
-            // Prepare image upload if any new images selected
-            const formData = new FormData();
-            if (newProfile) formData.append("profilePhoto", newProfile);
-            if (newDniFront) formData.append("idFrontPhoto", newDniFront);
-            if (newDniBack) formData.append("idBackPhoto", newDniBack);
-
-            if ([newProfile, newDniFront, newDniBack].some(Boolean)) {
-                await axios.post(
-                    `http://localhost:5000/api/users/upload-profile/${form.dni}`,
-                    formData,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-            }
-
-            alert("Profile updated successfully");
-            navigate("/dashboard");
+            setMessage("✅ Profile updated successfully!");
+            setTimeout(() => navigate('/dashboard'), 1500);
         } catch (error) {
-            console.error("Error saving profile:", error);
-            alert("Failed to save profile");
+            console.error(error);
+            setMessage(error?.response?.data?.error || "An unexpected error occurred while updating your profile.");
         }
     };
 
-    //error catched if brokes, i senend this instance of react error view card
-    if (loading) return <p>Loading...</p>;
+    if (loading) {
+        return (
+            <div className="form-container">
+                <div className="form-wrapper">
+                    <div className="form-header">
+                        <h2>Loading...</h2>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="ep-wrapper">
-            {/* Current profile photo and delete button */}
-            <div className="ep-header">
-                <img
-                    className="ep-avatar"
-                    src={
-                        user?.profilePhoto
-                            ? `http://localhost:5000${user.profilePhoto}`
-                            : "/assets/defaultProfile.png"
-                    }
-                    alt="Profile"
-                />
-                <button className="ep-del-btn" onClick={handleDeletePhoto}>
-                    Delete photo
-                </button>
+        <div className="form-container">
+            <div className="form-wrapper">
+                <div className="form-header">
+                    <h2>Edit Profile</h2>
+                    <p>Update your personal information and documents below.</p>
+                </div>
+
+                {message && (
+                    <div className={message.includes("✅") ? "success-message" : "error-message"}>
+                        {message}
+                    </div>
+                )}
+
+                <form className="form-grid" onSubmit={handleSave}>
+                    <div className="form-group">
+                        <label className="required">DNI</label>
+                        <input 
+                            name="dni" 
+                            value={form.dni} 
+                            onChange={onChange} 
+                            required 
+                            placeholder="Enter your DNI"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">First Name</label>
+                        <input 
+                            name="firstName" 
+                            value={form.firstName} 
+                            onChange={onChange} 
+                            required 
+                            placeholder="Enter your first name"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Last Name</label>
+                        <input 
+                            name="lastName" 
+                            value={form.lastName} 
+                            onChange={onChange} 
+                            required 
+                            placeholder="Enter your last name"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Email</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            value={form.email} 
+                            onChange={onChange} 
+                            required 
+                            placeholder="Enter your email"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Phone Number</label>
+                        <input 
+                            name="phoneNumber" 
+                            value={form.phoneNumber} 
+                            onChange={onChange} 
+                            required 
+                            placeholder="Enter your phone number"
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Preference</label>
+                        <select 
+                            name="preference" 
+                            value={form.preference} 
+                            onChange={onChange}
+                        >
+                            <option value="TENANT">Tenant</option>
+                            <option value="OWNER">Owner</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label>Profile Photo</label>
+                        <ReusableDropzone
+                            label="Update profile photo"
+                            onFileAccepted={setNewProfile}
+                            existingFileUrl={user.profilePhoto}
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label>DNI Front Photo</label>
+                        <ReusableDropzone
+                            label="Update DNI front photo"
+                            onFileAccepted={setNewDniFront}
+                            existingFileUrl={user.idFrontPhoto}
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label>DNI Back Photo</label>
+                        <ReusableDropzone
+                            label="Update DNI back photo"
+                            onFileAccepted={setNewDniBack}
+                            existingFileUrl={user.idBackPhoto}
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <button className="form-button" type="submit">
+                            Save Changes
+                        </button>
+                        <Link to="/dashboard" className="form-button secondary">
+                            Cancel
+                        </Link>
+                    </div>
+                </form>
             </div>
-
-            {/* Profile edit form */}
-            <form className="ep-form" onSubmit={handleSave}>
-                <label>
-                    DNI*
-                    <input name="dni" value={form.dni} onChange={onChange} required />
-                </label>
-                <label>
-                    First Name*
-                    <input name="firstName" value={form.firstName} onChange={onChange} required />
-                </label>
-                <label>
-                    Last Name*
-                    <input name="lastName" value={form.lastName} onChange={onChange} required />
-                </label>
-                <label>
-                    Email*
-                    <input type="email" name="email" value={form.email} onChange={onChange} required />
-                </label>
-                <label>
-                    Phone Number*
-                    <input name="phoneNumber" value={form.phoneNumber} onChange={onChange} required />
-                </label>
-                <label>
-                    Preference*
-                    <select name="preference" value={form.preference} onChange={onChange}>
-                        <option value="TENANT">Tenant</option>
-                        <option value="OWNER">Owner</option>
-                    </select>
-                </label>
-
-                {/* Image upload zones */}
-                <ReusableDropzone
-                    label="New profile photo"
-                    onFileAccepted={setNewProfile}
-                    existingFileUrl={user.profilePhoto}
-                />
-                <ReusableDropzone
-                    label="DNI card (front)"
-                    onFileAccepted={setNewDniFront}
-                    existingFileUrl={user.idFrontPhoto}
-                />
-                <ReusableDropzone
-                    label="DNI card (back)"
-                    onFileAccepted={setNewDniBack}
-                    existingFileUrl={user.idBackPhoto}
-                />
-
-                <button className="ep-save" type="submit">
-                    Save changes
-                </button>
-                <Link to="/dashboard" className="ep-cancel">
-                    Cancel
-                </Link>
-            </form>
         </div>
     );
 };

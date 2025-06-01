@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { documentFileFilter, imageFileFilter } = require('./fileValidation');
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -16,15 +17,15 @@ const storage = multer.diskStorage({
             case 'gallery':
                 subfolder = 'gallery';
                 break;
-            case 'validationDocument':
+            case 'validationDocuments':
                 subfolder = 'validationDocument';
                 break;
             default:
-                subfolder = 'misc';
+                return cb(new Error('Invalid field name'));
         }
 
-        // Construct upload directory path
-        const uploadPath = path.join(__dirname, '..', 'uploads', spaceId, subfolder);
+        // Construct upload directory path with 'spaces' parent directory
+        const uploadPath = path.join(__dirname, '..', 'uploads', 'spaces', spaceId, subfolder);
 
         // Ensure the directory exists
         try {
@@ -44,6 +45,19 @@ const storage = multer.diskStorage({
     }
 });
 
-const uploadSpaceFiles = multer({ storage });
+const fileFilter = (req, file, cb) => {
+    if (file.fieldname === 'gallery') {
+        imageFileFilter(req, file, cb);
+    } else if (file.fieldname === 'validationDocuments') {
+        documentFileFilter(req, file, cb);
+    } else {
+        cb(new Error('Invalid field name'));
+    }
+};
+
+const uploadSpaceFiles = multer({ 
+    storage,
+    fileFilter
+});
 
 module.exports = { uploadSpaceFiles };

@@ -1,43 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import "../styles/pages/adminValidation.css"
+import { FiArrowLeft, FiUserCheck, FiHome, FiFileText, FiCheckSquare } from 'react-icons/fi';
+import ReviewSidebar from '../components/ReviewSidebar';
 
 const AdminValidation = () => {
     const [users, setUsers] = useState([]);
     const [spaces, setSpaces] = useState([]);
     const [contracts, setContracts] = useState([]);
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [reviewType, setReviewType] = useState(null);
     const navigate = useNavigate();
 
-    // Approve or reject validation for user, space or contract
-    const handleValidation = async (type, id, validationStatus) => {
-        const endpointMap = {
-            user: `http://localhost:5000/api/users/${id}/validate`,
-            space: `http://localhost:5000/api/spaces/${id}/validate`,
-            contract: `http://localhost:5000/api/contracts/${id}/validate`
-        };
-
-        try {
-            const token = localStorage.getItem('adminToken');
-            await axios.patch(endpointMap[type], { validationStatus }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            alert(`${type.charAt(0).toUpperCase() + type.slice(1)} ${validationStatus === "APPROVED" ? "approved" : "rejected"}.`);
-            fetchPendingValidations(token);
-        } catch (error) {
-            console.error(`Error validating ${type}:`, error);
-            alert(`Failed to update ${type} validation.`);
-        }
-    };
-
-    // Check if admin token is valid and fetch pending validations
     useEffect(() => {
         const checkAdmin = async () => {
             try {
                 const token = localStorage.getItem('adminToken');
                 if (!token) {
-                    alert('Access denied. Please login as admin.');
                     navigate('/admin-login');
                     return;
                 }
@@ -47,14 +27,12 @@ const AdminValidation = () => {
                 });
 
                 if (!data.isAdmin) {
-                    alert('You do not have admin permissions.');
                     navigate('/');
                     return;
                 }
 
                 fetchPendingValidations(token);
             } catch (error) {
-                alert('Error verifying admin permissions.');
                 console.error(error);
                 navigate('/');
             }
@@ -63,7 +41,6 @@ const AdminValidation = () => {
         checkAdmin();
     }, [navigate]);
 
-    // Fetch all pending validations for users, spaces, and contracts
     const fetchPendingValidations = async (token) => {
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
@@ -77,67 +54,216 @@ const AdminValidation = () => {
             setContracts(contractsRes.data);
         } catch (error) {
             console.error("Error loading pending validations:", error);
-            alert("Failed to load pending validations.");
         }
     };
 
+    const handleValidation = async (type, id, status) => {
+        try {
+            const token = localStorage.getItem('adminToken');
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+
+            switch (type) {
+                case 'user':
+                    await axios.patch(`http://localhost:5000/api/users/${id}/validate`, 
+                        { validationStatus: status }, config);
+                    setUsers(users.filter(user => user._id !== id));
+                    break;
+                case 'space':
+                    await axios.patch(`http://localhost:5000/api/spaces/${id}/validate`,
+                        { validationStatus: status }, config);
+                    setSpaces(spaces.filter(space => space._id !== id));
+                    break;
+                case 'contract':
+                    await axios.patch(`http://localhost:5000/api/contracts/${id}/validate`,
+                        { validationStatus: status }, config);
+                    setContracts(contracts.filter(contract => contract._id !== id));
+                    break;
+                default:
+                    break;
+            }
+        } catch (error) {
+            console.error("Error during validation:", error);
+        }
+    };
+
+    // Handle review button click
+    const handleReview = (item, type) => {
+        setSelectedItem(item);
+        setReviewType(type);
+        setSidebarOpen(true);
+    };
+
     return (
-        <div className="validation-container">
-            <h2>Data Validation</h2>
+        <div className="admin-container">
+            <div className="admin-header">
+                <h1 className="admin-title">
+                    <FiCheckSquare /> Pending Validations
+                </h1>
+                <div className="admin-actions">
+                    <button 
+                        className="admin-button secondary"
+                        onClick={() => navigate('/admin-dashboard')}
+                    >
+                        <FiArrowLeft />
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
 
-            <section>
-                <h3>Pending Users</h3>
-                {users.length > 0 ? (
-                    users.map(user => (
-                        <div key={user._id}>
-                            <p><strong>{user.firstName} {user.lastName}</strong></p>
-                            <p>Email: {user.email} | Phone: {user.phoneNumber}</p>
-                            <p>Preference: {user.preference} | DNI: {user.dni}</p>
-                            <button onClick={() => handleValidation('user', user._id, "APPROVED")}>Approve</button>
-                            <button onClick={() => handleValidation('user', user._id, "REJECTED")}>Reject</button>
-                        </div>
-                    ))
-                ) : (
-                    <p>No pending users.</p>
-                )}
+            {/* Pending Users */}
+            <section className="admin-section">
+                <h2><FiUserCheck /> Pending Users</h2>
+                <div className="admin-table-container">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>DNI</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {users.map(user => (
+                                <tr key={user._id}>
+                                    <td>{user.dni}</td>
+                                    <td>{user.firstName} {user.lastName}</td>
+                                    <td>{user.email}</td>
+                                    <td>
+                                        <div className="admin-actions">
+                                            <button
+                                                className="admin-button primary"
+                                                onClick={() => handleReview(user, 'user')}
+                                            >
+                                                Review
+                                            </button>
+                                            <button
+                                                className="admin-button success"
+                                                onClick={() => handleValidation('user', user._id, 'APPROVED')}
+                                            >
+                                                Approve
+                                            </button>
+                                            <button
+                                                className="admin-button danger"
+                                                onClick={() => handleValidation('user', user._id, 'REJECTED')}
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
-            <section>
-                <h3>Pending Spaces</h3>
-                {spaces.length > 0 ? (
-                    spaces.map(space => (
-                        <div key={space._id}>
-                            <p><strong>{space.spaceType} - {space.description}</strong></p>
-                            <p>Owner DNI: {space.ownerDni} | Status: {space.status}</p>
-                            <p>Monthly Price: €{space.monthlyPrice} | Sale Price: €{space.salePrice}</p>
-                            <button onClick={() => handleValidation('space', space._id, "APPROVED")}>Approve</button>
-                            <button onClick={() => handleValidation('space', space._id, "REJECTED")}>Reject</button>
-                        </div>
-                    ))
-                ) : (
-                    <p>No pending spaces.</p>
-                )}
+            {/* Pending Spaces */}
+            <section className="admin-section">
+                <h2><FiHome /> Pending Spaces</h2>
+                <div className="admin-table-container">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Size</th>
+                                <th>Owner</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {spaces.map(space => (
+                                <tr key={space._id}>
+                                    <td>{space.spaceType}</td>
+                                    <td>{space.squareMeters}m²</td>
+                                    <td>{space.ownerDni}</td>
+                                    <td>
+                                        <div className="admin-actions">
+                                            <button
+                                                className="admin-button primary"
+                                                onClick={() => handleReview(space, 'space')}
+                                            >
+                                                Review
+                                            </button>
+                                            <button
+                                                className="admin-button success"
+                                                onClick={() => handleValidation('space', space._id, 'APPROVED')}
+                                            >
+                                                Approve
+                                            </button>
+                                            <button
+                                                className="admin-button danger"
+                                                onClick={() => handleValidation('space', space._id, 'REJECTED')}
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </section>
 
-            <section>
-                <h3>Pending Contracts</h3>
-                {contracts.length > 0 ? (
-                    contracts.map(contract => (
-                        <div key={contract._id}>
-                            <p><strong>{contract.contractType} - {contract.contractStatus}</strong></p>
-                            <p>Owner DNI: {contract.ownerDni} | Tenant DNI: {contract.tenantDni}</p>
-                            <p>Monthly Payment: €{contract.monthlyPayment} | Payment Status: {contract.paymentStatus}</p>
-                            <button onClick={() => handleValidation('contract', contract._id, "APPROVED")}>Approve</button>
-                            <button onClick={() => handleValidation('contract', contract._id, "REJECTED")}>Reject</button>
-                        </div>
-                    ))
-                ) : (
-                    <p>No pending contracts.</p>
-                )}
+            {/* Pending Contracts */}
+            <section className="admin-section">
+                <h2><FiFileText /> Pending Contracts</h2>
+                <div className="admin-table-container">
+                    <table className="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Tenant</th>
+                                <th>Owner</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {contracts.map(contract => (
+                                <tr key={contract._id}>
+                                    <td>{contract.contractType}</td>
+                                    <td>{contract.tenantDni}</td>
+                                    <td>{contract.ownerDni}</td>
+                                    <td>
+                                        <div className="admin-actions">
+                                            <button
+                                                className="admin-button primary"
+                                                onClick={() => handleReview(contract, 'contract')}
+                                            >
+                                                Review
+                                            </button>
+                                            <button
+                                                className="admin-button success"
+                                                onClick={() => handleValidation('contract', contract._id, 'APPROVED')}
+                                            >
+                                                Approve
+                                            </button>
+                                            <button
+                                                className="admin-button danger"
+                                                onClick={() => handleValidation('contract', contract._id, 'REJECTED')}
+                                            >
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
             </section>
-            <button onClick={() => navigate('/admin-dashboard')}>
-                Back Dashboard
-            </button>
+
+            <ReviewSidebar
+                isOpen={sidebarOpen}
+                onClose={() => {
+                    setSidebarOpen(false);
+                    setSelectedItem(null);
+                }}
+                data={selectedItem}
+                type={reviewType}
+                onValidate={handleValidation}
+            />
         </div>
     );
 };

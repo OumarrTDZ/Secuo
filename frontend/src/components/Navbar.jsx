@@ -1,23 +1,25 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePreference } from '../context/PreferenceContext'; // Import context hook for user preference
 import '../styles/components/navbar.css';
+import { FiHome, FiUser } from 'react-icons/fi';
 import logo from '../assets/logo.png';
 
 const Navbar = ({ user }) => {
     const { preference, togglePreference } = usePreference();
-
-    // Get initial letter of user's first name or fallback based on preference
-    const getInitial = () => {
-        if (user?.firstName) return user.firstName[0].toUpperCase();
-        return preference === 'TENANT' ? 'T' : 'O';
-    };
+    const navigate = useNavigate();
 
     return (
         <nav className="navbar">
             <div className="navbar-left">
                 {/* Display user initial as avatar */}
-                <div className="avatar">{getInitial()}</div>
+                <div className="avatar">
+                    {preference === 'OWNER' ? <FiHome /> : <FiUser />}
+                </div>
                 {/* Welcome message with user full name if available */}
-                <span className="welcome">Welcome {user?.firstName + " " + user?.lastName || ""}</span>
+                <span className="welcome">
+                    {user ? `Hola ${user.firstName} ${user.lastName}` : 'Bienvenido'}
+                </span>
             </div>
 
             <div className="navbar-right">

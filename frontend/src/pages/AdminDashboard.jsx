@@ -1,5 +1,6 @@
 import {useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
+import { FiUserCheck, FiHome, FiLogOut } from 'react-icons/fi';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();
@@ -8,34 +9,63 @@ const AdminDashboard = () => {
     useEffect(() => {
         const token = localStorage.getItem('adminToken');
         if (!token) {
-            alert("Access denied. Please log in as admin.");
-            navigate('/admin-login'); // Redirect to admin login if no token is found
+            navigate('/admin-login');
         }
-    }, []);
+    }, [navigate]);
 
-    // Handler for navigating to the data validation page
-    const handleNavigateToValidation = () => {
-        navigate('/admin-validation');
+    const handleLogout = () => {
+        localStorage.removeItem('adminToken');
+        navigate('/admin-login');
     };
 
     return (
-        //FIXPOINT - i will use login container jus for test fast
-        <div className="login-container">
-            <h2>Admin Dashboard</h2>
-            <button onClick={handleNavigateToValidation}>
-                Data Validation
-            </button>
-            <button
-                onClick={() => {
-                    localStorage.removeItem('adminToken');
-                    navigate('/admin-login');
-                }}
-            >
-                Log Out
-            </button>
-            <button onClick={() => navigate('/')}>Home</button>
+        <div className="admin-container">
+            <div className="admin-header">
+                <h1 className="admin-title">
+                    <FiHome /> Admin Dashboard
+                </h1>
+                <div className="admin-actions">
+                    <button 
+                        className="admin-button primary"
+                        onClick={() => navigate('/admin-validation')}
+                    >
+                        <FiUserCheck />
+                        Data Validation
+                    </button>
+                    <button 
+                        className="admin-button danger"
+                        onClick={handleLogout}
+                    >
+                        <FiLogOut />
+                        Log Out
+                    </button>
+                </div>
+            </div>
 
+            <div className="admin-grid">
+                <div className="admin-card">
+                    <h3>Pending Validations</h3>
+                    <p>Review and validate new users, spaces, and contracts.</p>
+                    <button 
+                        className="admin-button primary"
+                        onClick={() => navigate('/admin-validation')}
+                    >
+                        View Pending
+                    </button>
+                </div>
 
+                <div className="admin-card">
+                    <h3>System Overview</h3>
+                    <p>Monitor system status and performance.</p>
+                    {/* Aquí podrías agregar más funcionalidades en el futuro */}
+                </div>
+
+                <div className="admin-card">
+                    <h3>Reports</h3>
+                    <p>Access system reports and analytics.</p>
+                    {/* Aquí podrías agregar más funcionalidades en el futuro */}
+                </div>
+            </div>
         </div>
     );
 };

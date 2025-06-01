@@ -70,11 +70,16 @@ const ContractSchema = new mongoose.Schema({
         default: "ACTIVE"
         // Contract lifecycle status
     },
-        contractDocument: {
-            type: [String],
-            default: [],
-        // Path or URL to the signed contract document
-    },
+    contractDocument: [{
+        path: {
+            type: String,
+            required: true
+        },
+        originalName: {
+            type: String,
+            required: true
+        }
+    }],
     validationStatus: {
         type: String,
         enum: ["PENDING", "APPROVED", "REJECTED"],

@@ -10,8 +10,8 @@ const storage = multer.diskStorage({
             return cb(new Error("DNI must be provided in request body or params"));
         }
 
-        // Base directory for uploads per user DNI
-        const baseDir = path.join(__dirname, '..', 'uploads', dni);
+        // Base directory for uploads per user DNI, now inside 'users' directory
+        const baseDir = path.join(__dirname, '..', 'uploads', 'users', dni);
 
         // Determine subfolder by field name
         let subfolder;

@@ -27,7 +27,7 @@ const getRelativePath = (field, req) => {
             subfolder = 'misc';
     }
 
-    return `/uploads/${req.body.dni}/${subfolder}/${file.filename}`;
+    return `/uploads/users/${req.body.dni}/${subfolder}/${file.filename}`;
 };
 
 // Register a new user
@@ -162,19 +162,38 @@ const getUserProfile = async (req, res) => {
 // Approve or reject user (admin action)
 const validateUser = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
-        if (!user) return res.status(404).json({ error: "User not found." });
+        const { dni } = req.params;
+        const { validationStatus } = req.body;
 
-        user.validationStatus = req.body.validationStatus; // Expect "APPROVED" or "REJECTED"
+        const user = await User.findOne({ dni });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        user.validationStatus = validationStatus;
         await user.save();
 
-        res.json({
-            message: `User ${req.body.validationStatus === "APPROVED" ? "approved" : "rejected"}`,
-            user
-        });
+        // Send notification to the user
+        const io = req.app.get('io');
+        if (io) {
+            const title = validationStatus === 'APPROVED' ? 'Account Approved!' : 'Account Rejected';
+            const message = validationStatus === 'APPROVED' 
+                ? 'Your account has been approved. You can now use all features of the platform.'
+                : 'Your account has been rejected. Please contact support for more information.';
+            
+            await io.notifyUser(
+                user.dni,
+                validationStatus === 'APPROVED' ? 'USER_APPROVED' : 'USER_REJECTED',
+                title,
+                message,
+                user._id
+            );
+        }
+
+        res.json({ message: 'User validation status updated successfully', user });
     } catch (error) {
-        console.error("Error validating user:", error);
-        res.status(500).json({ error: "Internal server error." });
+        console.error('Error validating user:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 };
 
@@ -209,11 +228,20 @@ const getOwnerDashboard = async (req, res) => {
             return res.status(404).json({ error: "User not found." });
         }
 
+        // Get owned spaces
         const ownedSpaces = await Space.find({ ownerDni: user.dni }).select(
-            "spaceType monthlyPrice description _id gallery rooms validationStatus status"
+            "spaceType monthlyPrice description _id gallery rooms validationStatus status marking squareMeters"
         );
 
-        res.json({ user, ownedSpaces });
+        // Get contracts count for each space
+        const spacesWithContracts = await Promise.all(ownedSpaces.map(async (space) => {
+            const contractsCount = await Contract.countDocuments({ spaceId: space._id });
+            const spaceObj = space.toObject();
+            spaceObj.contracts = contractsCount;
+            return spaceObj;
+        }));
+
+        res.json({ user, ownedSpaces: spacesWithContracts });
     } catch (error) {
         console.error("Error in getOwnerDashboard:", error);
         res.status(500).json({ error: "Internal server error." });

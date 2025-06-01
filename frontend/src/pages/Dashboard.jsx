@@ -1,15 +1,26 @@
 import { usePreference } from '../context/PreferenceContext';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardTenant from './DashboardTenant';
 import DashboardOwner from './DashboardOwner';
-import Navbar from '../components/Navbar';
 
-const Dashboard = ({ user }) => {
+const Dashboard = () => {
     const { preference } = usePreference();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const token = localStorage.getItem('userToken');
+        if (!token) {
+            navigate('/login');
+        }
+    }, [navigate]);
 
     return (
-        <div>
-            <Navbar user={user} />
-            {preference === 'TENANT' ? <DashboardTenant /> : <DashboardOwner />}
+        <div className="dashboard-content">
+            {preference === 'TENANT' ? 
+                <DashboardTenant /> : 
+                <DashboardOwner />
+            }
         </div>
     );
 };

@@ -1,5 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { useState, useEffect } from 'react';
 import './styles/styles.css';
+import './styles/layouts/adminLayout.css';
 import Home from './pages/Home';
 import Chat from './pages/Chat';
 import Login from './pages/Login';
@@ -10,6 +12,7 @@ import AdminDashboard from "./pages/AdminDashboard.jsx";
 import CreateSpace from "./pages/CreateSpace.jsx";
 import DashboardTenant from './pages/DashboardTenant.jsx';
 import SpaceDetails from "./pages/SpaceDetails.jsx";
+import TenantSpaceDetails from "./pages/TenantSpaceDetails.jsx";
 import DashboardOwner from './pages/DashboardOwner.jsx';
 import { PreferenceProvider } from './context/PreferenceContext.jsx';
 import Dashboard from './pages/Dashboard';
@@ -17,36 +20,132 @@ import EditContract from "./pages/EditContract.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
 import CreateContract from "./pages/CreateContract.jsx";
 import CreateReport from "./pages/CreateReport.jsx";
+import EditSpace from "./pages/EditSpace.jsx";
+import Navbar from './components/Navbar';
+import SidebarLeft from './components/SidebarLeft';
+import SidebarRight from './components/SidebarRight';
+import axios from 'axios';
 
-function App() {
+// Layout para usuarios normales
+const UserLayout = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const location = useLocation();
+
+    const fetchUserData = async () => {
+        const token = localStorage.getItem('userToken');
+        if (!token) {
+            setUser(null);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const { data } = await axios.get('http://localhost:5000/api/users/profile', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setUser(data.user);
+        } catch (error) {
+            console.error('Error fetching user data:', error);
+            localStorage.removeItem('userToken');
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserData();
+    }, [location.pathname]);
+
+    if (loading) {
+        return (
+            <div className="loading-container">
+                <div className="loading-spinner">Loading...</div>
+            </div>
+        );
+    }
 
     return (
-        <Router>
-            <Routes>
-                // ADMIN API ROUTES
-                <Route path="/admin-login" element={<AdminLogin />} /> {/* Admin login */}
-                <Route path="/admin-dashboard" element={<AdminDashboard />} /> {/* Admin dashboard */}
-                <Route path="/admin-validation" element={<AdminValidation />} />
+        <div className="app-wrapper">
+            <Navbar user={user} />
+            <div className="main-wrapper">
+                <SidebarLeft user={user} />
+                <div className="main-content">
+                    {children}
+                </div>
+                <SidebarRight user={user} reloadUser={fetchUserData} />
+            </div>
+        </div>
+    );
+};
 
-                // GLOBAL API ROUTES
+// Layout para administradores (sin sidebars ni navbar)
+const AdminLayout = ({ children }) => {
+    return <div className="admin-layout">{children}</div>;
+};
+
+function AppContent() {
+    const location = useLocation();
+    
+    // Rutas que son para administradores
+    const isAdminRoute = (path) => {
+        return ['/admin-login', '/admin-dashboard', '/admin-validation'].includes(path);
+    };
+
+    // Rutas públicas que no necesitan layout
+    const isPublicRoute = (path) => {
+        return ['/', '/login', '/register'].includes(path);
+    };
+
+    const getLayout = (component) => {
+        if (isPublicRoute(location.pathname)) {
+            return component;
+        }
+        if (isAdminRoute(location.pathname)) {
+            return <AdminLayout>{component}</AdminLayout>;
+        }
+        return <UserLayout>{component}</UserLayout>;
+    };
+
+    return (
+        <PreferenceProvider>
+            <Routes>
+                {/* Rutas públicas */}
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                // USER API ROUTES
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/space/:spaceId" element={<SpaceDetails />} />
-                <Route path="/report/:spaceId" element={<CreateReport />} />
-                <Route path="/contracts/new" element={<CreateContract />} />
-                <Route path="/edit-profile" element={<EditProfile />} />
-                <Route path="/dashboard-tenant" element={<Dashboard />} />
-                <Route path="/dashboard-owner" element={<Dashboard />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/create-space" element={<CreateSpace />} />
-                <Route path="/edit-contract/:contractId" element={<EditContract />} />
+                {/* Rutas de administrador */}
+                <Route path="/admin-login" element={<AdminLogin />} />
+                <Route path="/admin-dashboard" element={getLayout(<AdminDashboard />)} />
+                <Route path="/admin-validation" element={getLayout(<AdminValidation />)} />
+
+                {/* Rutas de usuario */}
+                <Route path="/dashboard" element={getLayout(<Dashboard />)} />
+                <Route path="/dashboard-tenant" element={getLayout(<DashboardTenant />)} />
+                <Route path="/dashboard-owner" element={getLayout(<DashboardOwner />)} />
+                <Route path="/create-space" element={getLayout(<CreateSpace />)} />
+                <Route path="/space/:id" element={getLayout(<SpaceDetails />)} />
+                <Route path="/edit-space/:id" element={getLayout(<EditSpace />)} />
+                <Route path="/tenant-space/:id" element={getLayout(<TenantSpaceDetails />)} />
+                <Route path="/edit-contract/:id" element={getLayout(<EditContract />)} />
+                <Route path="/edit-profile" element={getLayout(<EditProfile />)} />
+                <Route path="/create-contract/:spaceId" element={getLayout(<CreateContract />)} />
+                <Route path="/create-report/:spaceId" element={getLayout(<CreateReport />)} />
+                <Route path="/chat" element={getLayout(<Chat />)} />
             </Routes>
+        </PreferenceProvider>
+    );
+}
+
+function App() {
+    return (
+        <Router>
+            <AppContent />
         </Router>
     );
 }
 
 export default App;
+

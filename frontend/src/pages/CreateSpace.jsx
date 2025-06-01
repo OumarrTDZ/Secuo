@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/pages/createSpace.css';
+import '../styles/components/forms.css';
 import { useNavigate } from 'react-router-dom';
 import ImageDropZone from "../components/ImageDropZone.jsx";
 
@@ -22,9 +23,9 @@ const CreateSpace = () => {
     });
 
     const [gallery, setGallery] = useState([]);
-    const [validationDocuments, setValidationDocuments] = useState([]);
+    const [validationDocument, setValidationDocument] = useState([]);
     const [message, setMessage] = useState('');
-    const [token, setToken] = useState(localStorage.getItem('token'));
+    const [token, setToken] = useState(localStorage.getItem('userToken'));
     const [userDni, setUserDni] = useState(localStorage.getItem('dni'));
 
     useEffect(() => {
@@ -47,122 +48,194 @@ const CreateSpace = () => {
             return setMessage("Authentication failed. Please log in again.");
         }
 
-        if (!formData.spaceType || !formData.squareMeters || !formData.ownerDni || !formData.monthlyPrice || validationDocuments.length === 0) {
-            return alert("Please complete all required fields and upload at least one validation document.");
+        if (!formData.spaceType || !formData.squareMeters || !formData.ownerDni || !formData.monthlyPrice || validationDocument.length === 0) {
+            return setMessage("Please complete all required fields and upload at least one validation document.");
         }
 
         try {
-            const spaceRes = await axios.post(
-                'http://localhost:5000/api/spaces',
-                { ...formData, ownerDni: userDni },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+            // Create space
+            const spaceResponse = await axios.post('http://localhost:5000/api/spaces', formData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-            const { _id: spaceId } = spaceRes.data.space;
+            const spaceId = spaceResponse.data.space._id;
 
-            const filesData = new FormData();
-            gallery.forEach(file => filesData.append('gallery', file));
-            validationDocuments.forEach(file => filesData.append('validationDocument', file));
+            // Upload files (both gallery and validation documents) in a single request
+            if (gallery.length > 0 || validationDocument.length > 0) {
+                const uploadData = new FormData();
+                
+                // Add gallery images
+                gallery.forEach(file => {
+                    uploadData.append('gallery', file);
+                });
 
-            await axios.post(
-                `http://localhost:5000/api/spaces/${spaceId}/upload`,
-                filesData,
-                {
+                // Add validation documents
+                validationDocument.forEach(file => {
+                    uploadData.append('validationDocuments', file);
+                });
+
+                await axios.post(`http://localhost:5000/api/spaces/${spaceId}/upload`, uploadData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+                    }
+                });
+            }
 
-            setMessage('Space successfully created and files uploaded.');
-
-            setFormData({
-                spaceType: 'APARTMENT',
-                floor: '',
-                door: '',
-                squareMeters: '',
-                rooms: '',
-                marking: '',
-                description: '',
-                status: 'AVAILABLE',
-                monthlyPrice: '',
-                salePrice: '',
-                ownerDni: userDni,
-            });
-            setGallery([]);
-            setValidationDocuments([]);
-
+            setMessage("✅ Space created successfully!");
             setTimeout(() => navigate('/dashboard-owner'), 1500);
         } catch (error) {
             console.error(error);
-            setMessage('There was an error creating the space or uploading the files.');
+            setMessage(error?.response?.data?.error || "An unexpected error occurred while creating the space.");
         }
     };
 
     return (
-        <div className="create-space-container">
-            <h2>Create New Rental Space</h2>
-            <form className="space-form" onSubmit={handleSubmit}>
-                <label>
-                    Space Type:
-                    <select name="spaceType" value={formData.spaceType} onChange={handleChange}>
-                        <option value="APARTMENT">Apartment</option>
-                        <option value="GARAGE">Garage</option>
-                    </select>
-                </label>
+        <div className="form-container">
+            <div className="form-wrapper">
+                <div className="form-header">
+                    <h2>Create New Rental Space</h2>
+                    <p>Fill in the details below to list your property on SECUO.</p>
+                </div>
 
-                <input name="marking" type="text" placeholder="Space Name" value={formData.marking} onChange={handleChange} />
-                <input name="floor" type="number" placeholder="Floor" value={formData.floor} onChange={handleChange} />
-                <input name="door" type="text" placeholder="Door" value={formData.door} onChange={handleChange} />
-                <input name="squareMeters" type="number" placeholder="Square Meters *" value={formData.squareMeters} onChange={handleChange} required />
-                <input name="rooms" type="number" placeholder="Rooms" value={formData.rooms} onChange={handleChange} />
-                <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} />
+                {message && (
+                    <div className={message.includes("✅") ? "success-message" : "error-message"}>
+                        {message}
+                    </div>
+                )}
 
-                <label>
-                    Status:
-                    <select name="status" value={formData.status} onChange={handleChange}>
-                        <option value="AVAILABLE">Available</option>
-                        <option value="OCCUPIED">Occupied</option>
-                        <option value="MAINTENANCE">Under Maintenance</option>
-                    </select>
-                </label>
+                <form className="form-grid" onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="required">Space Type</label>
+                        <select name="spaceType" value={formData.spaceType} onChange={handleChange}>
+                            <option value="APARTMENT">Apartment</option>
+                            <option value="GARAGE">Garage</option>
+                        </select>
+                    </div>
 
-                <input name="monthlyPrice" type="number" placeholder="Monthly Price *" value={formData.monthlyPrice} onChange={handleChange} />
+                    <div className="form-group">
+                        <label>Space Name</label>
+                        <input 
+                            name="marking" 
+                            type="text" 
+                            placeholder="Enter a name for your space"
+                            value={formData.marking} 
+                            onChange={handleChange} 
+                        />
+                    </div>
 
-                <label>
-                    Image Gallery:
-                    <ImageDropZone
-                        files={gallery}
-                        setFiles={setGallery}
-                        maxFiles={10}
-                        label="Drag images or click to select (Max 10)"
-                        fileType="image"
-                    />
-                </label>
+                    <div className="form-group">
+                        <label>Floor</label>
+                        <input 
+                            name="floor" 
+                            type="number" 
+                            placeholder="Floor number"
+                            value={formData.floor} 
+                            onChange={handleChange} 
+                        />
+                    </div>
 
-                <label>
-                    Property Validation Documents:
-                    <ImageDropZone
-                        files={validationDocuments}
-                        setFiles={setValidationDocuments}
-                        maxFiles={5}
-                        label="Drag documents or click to select (Max 5)"
-                        fileType="file"
-                    />
-                </label>
+                    <div className="form-group">
+                        <label>Door</label>
+                        <input 
+                            name="door" 
+                            type="text" 
+                            placeholder="Door number/letter"
+                            value={formData.door} 
+                            onChange={handleChange} 
+                        />
+                    </div>
 
-                <button className="button-create-space" type="submit">Create Space</button>
-                <button
-                    type="button"
-                    className="back-button"
-                    onClick={() => navigate('/dashboard-owner')}
-                >
-                    Back to Dashboard
-                </button>
+                    <div className="form-group">
+                        <label className="required">Square Meters</label>
+                        <input 
+                            name="squareMeters" 
+                            type="number" 
+                            placeholder="Property size in m²"
+                            value={formData.squareMeters} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
 
-                {message && <p className="message">{message}</p>}
-            </form>
+                    <div className="form-group">
+                        <label>Number of Rooms</label>
+                        <input 
+                            name="rooms" 
+                            type="number" 
+                            placeholder="Number of rooms"
+                            value={formData.rooms} 
+                            onChange={handleChange} 
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label>Description</label>
+                        <textarea 
+                            name="description" 
+                            placeholder="Describe your property..."
+                            value={formData.description} 
+                            onChange={handleChange} 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Status</label>
+                        <select name="status" value={formData.status} onChange={handleChange}>
+                            <option value="AVAILABLE">Available</option>
+                            <option value="OCCUPIED">Occupied</option>
+                            <option value="MAINTENANCE">Under Maintenance</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Monthly Price (€)</label>
+                        <input 
+                            name="monthlyPrice" 
+                            type="number" 
+                            placeholder="Monthly rental price"
+                            value={formData.monthlyPrice} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label>Image Gallery</label>
+                        <ImageDropZone
+                            files={gallery}
+                            setFiles={setGallery}
+                            maxFiles={10}
+                            label="Drag images or click to select (Max 10)"
+                            fileType="image"
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label className="required">Property Validation Documents</label>
+                        <ImageDropZone
+                            files={validationDocument}
+                            setFiles={setValidationDocument}
+                            maxFiles={5}
+                            label="Drag documents or click to select (Max 5)"
+                            fileType="file"
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <button className="form-button" type="submit">
+                            Create Space
+                        </button>
+                        <button
+                            type="button"
+                            className="form-button secondary"
+                            onClick={() => navigate(-1)}
+                        >
+                            Back
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };

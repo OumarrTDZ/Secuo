@@ -1,34 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { useNavigate, useLocation } from 'react-router-dom';
-import ImageDropZone from "../components/ImageDropZone.jsx";
+import ImageDropZone from '../components/ImageDropZone';
+import '../styles/components/forms.css';
 
 const CreateContract = () => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const params = new URLSearchParams(location.search);
-    const spaceId = params.get('spaceId');
-
-    const [token, setToken] = useState(localStorage.getItem('token'));
-    const [ownerDni, setOwnerDni] = useState(localStorage.getItem('dni'));
-
+    const { spaceId } = useParams();
     const [formData, setFormData] = useState({
         tenantDni: '',
         contractType: 'RENT',
         startDate: '',
         endDate: '',
         monthlyPayment: '',
-        initialPayment: ''
+        initialPayment: '0'
     });
-
     const [contractDocuments, setContractDocuments] = useState([]);
     const [message, setMessage] = useState('');
-
-    useEffect(() => {
-        if (!token || !ownerDni) {
-            setMessage("You must be logged in to create a contract.");
-        }
-    }, [token, ownerDni]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -38,78 +26,195 @@ const CreateContract = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!spaceId || !formData.tenantDni || !formData.startDate || !formData.endDate || !formData.monthlyPayment || contractDocuments.length === 0) {
-            return alert("Please fill in all required fields and upload at least one contract document.");
+        if (!formData.tenantDni || !formData.startDate || !formData.endDate || !formData.monthlyPayment || formData.initialPayment === '') {
+            setMessage("Please fill in all required fields.");
+            return;
+        }
+
+        // Validate dates
+        const start = new Date(formData.startDate);
+        const end = new Date(formData.endDate);
+        if (start >= end) {
+            setMessage("Start date must be before end date");
+            return;
         }
 
         try {
-            //create a contraact without file
-            const res = await axios.post(
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                setMessage("Authentication failed. Please log in again.");
+                return;
+            }
+
+            const dataToSend = {
+                ...formData,
+                spaceId,
+                monthlyPayment: Number(formData.monthlyPayment),
+                initialPayment: Number(formData.initialPayment),
+                contractDocument: []
+            };
+            console.log('Sending contract data:', dataToSend);
+
+            // Create contract
+            const contractResponse = await axios.post(
                 'http://localhost:5000/api/contracts',
-                { ...formData, spaceId },
+                dataToSend,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            const contractId = res.data.contract._id;
+            const contractId = contractResponse.data.contract._id;
 
-            // upload file
-            const filesData = new FormData();
-            contractDocuments.forEach(file => filesData.append('contractDocument', file));
+            // Upload contract documents if any
+            if (contractDocuments.length > 0) {
+                const documentsData = new FormData();
+                contractDocuments.forEach(file => {
+                    documentsData.append('contractDocument', file);
+                });
 
-            await axios.post(
-                `http://localhost:5000/api/contracts/${contractId}/upload`,
-                filesData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
+                await axios.post(
+                    `http://localhost:5000/api/contracts/${contractId}/upload`,
+                    documentsData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                            Authorization: `Bearer ${token}`,
+                        }
+                    }
+                );
+            }
 
-            setMessage("Contract created and documents uploaded successfully.");
+            setMessage("✅ Contract created successfully!");
             setTimeout(() => navigate('/dashboard-owner'), 1500);
         } catch (error) {
-            if (error.response && error.response.status === 400) {
-                alert(error.response.data.error); //
+            console.error('Error details:', {
+                response: error.response?.data,
+                status: error.response?.status,
+                data: error.response?.data?.error
+            });
+
+            // Mostrar mensaje específico según el error
+            if (error.response?.status === 403) {
+                setMessage("You are not authorized to create contracts for this space.");
+            } else if (error.response?.status === 404) {
+                setMessage("The space was not found. Please try again.");
+            } else if (error.response?.status === 400 && error.response?.data?.error) {
+                setMessage(error.response.data.error);
             } else {
-                console.error("Unexpected error:", error);
-                alert("An unexpected error occurred while creating the contract.");
+                setMessage("An unexpected error occurred while creating the contract.");
             }
         }
     };
 
     return (
-        <div className="p-4 max-w-xl mx-auto">
-            <h2 className="text-2xl font-bold mb-4">Create Contract</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <input name="tenantDni" placeholder="Tenant DNI *" type="text" onChange={handleChange} required className="w-full p-2 border rounded" />
-                <select name="contractType" onChange={handleChange} className="w-full p-2 border rounded">
-                    <option value="RENT">Rent</option>
-                    <option value="SALE">Sale</option>
-                </select>
-                <input name="startDate" type="date" onChange={handleChange} required className="w-full p-2 border rounded" />
-                <input name="endDate" type="date" onChange={handleChange} required className="w-full p-2 border rounded" />
-                <input name="monthlyPayment" type="number" placeholder="Monthly Payment *" onChange={handleChange} required className="w-full p-2 border rounded" />
-                <input name="initialPayment" type="number" placeholder="Initial Payment" onChange={handleChange} className="w-full p-2 border rounded" />
+        <div className="form-container">
+            <div className="form-wrapper">
+                <div className="form-header">
+                    <h2>Create New Contract</h2>
+                    <p>Fill in the contract details below to formalize the rental agreement.</p>
+                </div>
 
-                <label className="block">
-                    Contract Documents (PDF/Images):
-                    <ImageDropZone
-                        files={contractDocuments}
-                        setFiles={setContractDocuments}
-                        maxFiles={5}
-                        label="Drag documents or click to select (Max 5)"
-                        fileType="file"
-                    />
-                </label>
+                {message && (
+                    <div className={message.includes("✅") ? "success-message" : "error-message"}>
+                        {message}
+                    </div>
+                )}
 
-                <button type="submit" className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
-                    Save Contract
-                </button>
+                <form className="form-grid" onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <label className="required">Tenant DNI</label>
+                        <input 
+                            name="tenantDni" 
+                            type="text" 
+                            placeholder="Enter tenant's DNI"
+                            value={formData.tenantDni} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
 
-                {message && <p className="text-center text-sm text-blue-600 mt-2">{message}</p>}
-            </form>
+                    <div className="form-group">
+                        <label className="required">Contract Type</label>
+                        <select 
+                            name="contractType" 
+                            value={formData.contractType} 
+                            onChange={handleChange}
+                        >
+                            <option value="RENT">Rent</option>
+                            <option value="SALE">Sale</option>
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Start Date</label>
+                        <input 
+                            name="startDate" 
+                            type="date" 
+                            value={formData.startDate} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">End Date</label>
+                        <input 
+                            name="endDate" 
+                            type="date" 
+                            value={formData.endDate} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Monthly Payment (€)</label>
+                        <input 
+                            name="monthlyPayment" 
+                            type="number" 
+                            placeholder="Enter monthly payment amount"
+                            value={formData.monthlyPayment} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Initial Payment (€)</label>
+                        <input 
+                            name="initialPayment" 
+                            type="number" 
+                            placeholder="Enter initial payment amount"
+                            value={formData.initialPayment} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label>Contract Documents</label>
+                        <ImageDropZone
+                            files={contractDocuments}
+                            setFiles={setContractDocuments}
+                            maxFiles={5}
+                            label="Drag documents or click to select (Max 5)"
+                            fileType="file"
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <button className="form-button" type="submit">
+                            Create Contract
+                        </button>
+                        <button
+                            type="button"
+                            className="form-button secondary"
+                            onClick={() => navigate(-1)}
+                        >
+                            Back
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     );
 };
