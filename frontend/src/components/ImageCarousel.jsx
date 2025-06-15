@@ -9,9 +9,10 @@ import 'swiper/css/pagination';
 import '../styles/components/imageCarousel.css';
 
 const ImageCarousel = ({ images = [], spaceId }) => {
-    // Asegurarse de que images es un array y tiene elementos válidos
+    // Ensure 'images' is a valid array and filter out empty entries
     const validImages = Array.isArray(images) ? images.filter(img => img) : [];
 
+    // If there are no valid images, display a placeholder
     if (validImages.length === 0) {
         return (
             <div className="no-images-placeholder">
@@ -20,22 +21,25 @@ const ImageCarousel = ({ images = [], spaceId }) => {
         );
     }
 
+    // Helper function to generate the full image URL
     const getImageUrl = (image) => {
         try {
-            // Si es un objeto con URL, extraer el nombre del archivo de la URL
+            // If it's an object with a 'url' field
             if (image?.url) {
+                // Use full external URL if available
                 if (image.url.startsWith('http')) {
                     return image.url;
                 }
+                // Otherwise prepend backend base URL
                 return `http://localhost:5000${image.url}`;
             }
-            
-            // Si es una cadena, usar directamente como nombre de archivo
+
+            // If it's a string, treat it as a filename
             if (typeof image === 'string') {
                 return `http://localhost:5000/uploads/spaces/${spaceId}/gallery/${image}`;
             }
 
-            // Si tiene filename u otros campos
+            // Try to use other possible filename fields
             const filename = image?.filename || image?.name || 'default.jpg';
             return `http://localhost:5000/uploads/spaces/${spaceId}/gallery/${filename}`;
         } catch (error) {
@@ -62,7 +66,7 @@ const ImageCarousel = ({ images = [], spaceId }) => {
             >
                 {validImages.map((image, index) => {
                     const imageUrl = getImageUrl(image);
-                    
+
                     return (
                         <SwiperSlide key={index}>
                             <div className="carousel-item">
@@ -76,6 +80,7 @@ const ImageCarousel = ({ images = [], spaceId }) => {
                                             originalImage: image,
                                             spaceId
                                         });
+                                        // Display a default image and basic styling on error
                                         e.target.style.backgroundColor = '#f5f5f5';
                                         e.target.style.padding = '20px';
                                         e.target.src = '/assets/defaultSpace.png';
@@ -90,4 +95,4 @@ const ImageCarousel = ({ images = [], spaceId }) => {
     );
 };
 
-export default ImageCarousel; 
+export default ImageCarousel;

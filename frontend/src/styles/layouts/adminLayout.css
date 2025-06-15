@@ -200,7 +200,6 @@
     font-size: 0.875rem;
 }
 
-/* Ajustar el ancho de la columna de acciones y alinear a la derecha */
 .admin-table td:last-child {
     width: 280px;
     text-align: right;
@@ -210,7 +209,6 @@
     justify-content: flex-end;
 }
 
-/* Asegurar que las otras columnas no tomen demasiado espacio */
 .admin-table th:not(:last-child),
 .admin-table td:not(:last-child) {
     white-space: nowrap;

@@ -63,10 +63,10 @@ const SpaceSchema = new mongoose.Schema({
         default: "PENDING"
         // Approval status for the space
     },
-    monthlyPrice: {
+    monthlyEarnings: {
         type: Number,
-        required: true
-        // Monthly rental price (if applicable)
+        default: 0
+        // Total monthly earnings from all active contracts
     },
     salePrice: {
         type: Number,
@@ -78,6 +78,27 @@ const SpaceSchema = new mongoose.Schema({
         required: false,
         default: []
         // Array of images with URLs and optional descriptions
+    },
+    // Location fields
+    municipality: {
+        type: String,
+        required: true
+        // Municipality where the space is located
+    },
+    city: {
+        type: String,
+        required: true
+        // City where the space is located
+    },
+    address: {
+        type: String,
+        required: true
+        // Full street address of the space
+    },
+    postalCode: {
+        type: String,
+        required: true
+        // Postal code of the space location
     }
 }, { timestamps: true });
 

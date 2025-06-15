@@ -26,11 +26,11 @@ const DashboardOwner = () => {
                     </button>
                 </div>
 
-                {/* ... spaces list ... */}
+                {/* ...I WILL PUT HERE THE spaces list ... */}
             </div>
 
             <div className="sidebar-right">
-                {/* ... sidebar content ... */}
+                {/* ... I WILL PUT HERE THE sidebar content ... */}
             </div>
         </div>
     );

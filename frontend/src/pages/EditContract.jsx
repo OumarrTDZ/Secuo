@@ -14,7 +14,7 @@ const EditContract = () => {
         startDate: '',
         endDate: '',
         monthlyPayment: '',
-        status: 'ACTIVE',
+        contractStatus: 'ACTIVE',
         tenantDni: ''
     });
     const [existingDocuments, setExistingDocuments] = useState([]);
@@ -85,7 +85,7 @@ const EditContract = () => {
                     startDate: formatDate(contract.startDate),
                     endDate: formatDate(contract.endDate),
                     monthlyPayment: contract.monthlyPayment || '',
-                    status: contract.status || 'ACTIVE',
+                    contractStatus: contract.contractStatus || 'ACTIVE',
                     tenantDni: contract.tenantDni || ''
                 };
 
@@ -189,14 +189,19 @@ const EditContract = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setMessage('');
 
         try {
+            console.log('Submitting contract update:', formData);
+            
             // Update contract details
-            await axios.patch(
+            const response = await axios.patch(
                 `http://localhost:5000/api/contracts/${id}`,
                 formData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
+
+            console.log('Contract update response:', response.data);
 
             // Upload new documents if any
             if (newDocuments.length > 0) {
@@ -227,8 +232,27 @@ const EditContract = () => {
                 }
             }, 1500);
         } catch (error) {
-            console.error(error);
-            setMessage(error?.response?.data?.message || "An unexpected error occurred while updating the contract.");
+            console.error('Error updating contract:', error);
+            console.error('Error details:', {
+                response: error.response?.data,
+                status: error.response?.status,
+                message: error.message
+            });
+
+            let errorMessage = "An unexpected error occurred while updating the contract.";
+            
+            if (error.response?.data?.error) {
+                errorMessage = error.response.data.error;
+                if (error.response.data.details) {
+                    errorMessage += `: ${error.response.data.details}`;
+                }
+            } else if (error.response?.status === 403) {
+                errorMessage = "You don't have permission to update this contract.";
+            } else if (error.response?.status === 404) {
+                errorMessage = "Contract not found.";
+            }
+
+            setMessage(errorMessage);
         }
     };
 
@@ -288,15 +312,15 @@ const EditContract = () => {
                     <div className="form-group">
                         <label className="required">Status</label>
                         <select 
-                            name="status" 
-                            value={formData.status} 
+                            name="contractStatus" 
+                            value={formData.contractStatus} 
                             onChange={handleChange}
                             required
                         >
                             <option value="">Select status</option>
-                            <option value="ACTIVE">Active</option>
-                            <option value="TERMINATED">Terminated</option>
-                            <option value="EXPIRED">Expired</option>
+                            <option value="ACTIVE">Active - Contract in force</option>
+                            <option value="EXPIRED">Expired - Reached end date</option>
+                            <option value="TERMINATED">Terminated - Ended early</option>
                         </select>
                     </div>
 

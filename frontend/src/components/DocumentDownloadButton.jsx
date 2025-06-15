@@ -23,7 +23,7 @@ const DocumentDownloadButton = ({ documents, type, id }) => {
     };
 
     const downloadAllDocuments = () => {
-        // Descargar cada documento
+        // Download each document
         documents.forEach((doc, index) => {
             const link = document.createElement('a');
             link.href = getDocumentUrl(doc);

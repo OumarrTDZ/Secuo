@@ -36,6 +36,10 @@ const DashboardOwner = () => {
         fetchOwnerData();
     }, []);
 
+    const handleSpaceDeleted = (deletedSpaceId) => {
+        setOwnedSpaces(prevSpaces => prevSpaces.filter(space => space._id !== deletedSpaceId));
+    };
+
     if (loading) return <p>Loading spaces...</p>;
 
     return (
@@ -57,7 +61,11 @@ const DashboardOwner = () => {
             <div className="grid">
                 {ownedSpaces.length > 0 ? (
                     ownedSpaces.map(space => (
-                        <OwnerSpaceCard key={space._id} space={space} />
+                        <OwnerSpaceCard 
+                            key={space._id} 
+                            space={space} 
+                            onDelete={handleSpaceDeleted}
+                        />
                     ))
                 ) : (
                     <div className="no-spaces-message">

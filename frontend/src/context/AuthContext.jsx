@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
         const token = localStorage.getItem('authToken');
         if (token) {
             setIsAuthenticated(true);
-            // Here you could fetch the user from backend if needed
             // setUser(fetchUserFromToken(token));
         }
     }, []);

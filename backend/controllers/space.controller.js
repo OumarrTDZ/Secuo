@@ -1,13 +1,28 @@
 const Space = require('../models/Space.model');
 const Contract = require('../models/Contract.model');
+const User = require('../models/User.model');
 const { isValidObjectId } = require('mongoose');
 
-/**
- * Create a new space (only owners allowed)
- */
+// Create a new space (only owners allowed)
 const createSpace = async (req, res) => {
     try {
-        const space = new Space({ ...req.body, ownerDni: req.user.dni });
+        // Extract location fields from request body
+        const { municipality, city, address, postalCode, ...otherFields } = req.body;
+
+        console.log('Location fields:', { municipality, city, address, postalCode });
+        console.log('Other fields:', otherFields);
+
+        // Create space with all fields including location and initialize monthlyEarnings to 0
+        const space = new Space({
+            ...otherFields,
+            municipality,
+            city,
+            address,
+            postalCode,
+            monthlyEarnings: 0,
+            ownerDni: req.user.dni
+        });
+
         await space.save();
         res.status(201).json({ message: "Space created successfully", space });
     } catch (error) {
@@ -16,9 +31,7 @@ const createSpace = async (req, res) => {
     }
 };
 
-/**
- * Get all spaces
- */
+// Get all spaces
 const getSpaces = async (req, res) => {
     try {
         const spaces = await Space.find();
@@ -29,43 +42,41 @@ const getSpaces = async (req, res) => {
     }
 };
 
-/**
- * Get a space by ID including associated contracts
- */
+// Get a space by ID including associated contracts and tenant info
 const getSpaceById = async (req, res) => {
     try {
-        console.log('1. Backend: Recibida petición getSpaceById');
-        console.log('2. Backend: Parámetros:', {
+        console.log('Request received: getSpaceById');
+        console.log('Request params:', {
             id: req.params.id,
             headers: req.headers,
             user: req.user
         });
 
         const { id } = req.params;
-        console.log('3. Backend: Buscando espacio con ID:', id);
         const space = await Space.findById(id);
-        
+
         if (!space) {
-            console.log('4. Backend: Espacio no encontrado');
+            console.log('Space not found');
             return res.status(404).json({ error: "Space not found" });
         }
-        
-        console.log('5. Backend: Espacio encontrado:', space);
-        console.log('6. Backend: Buscando contratos para el espacio');
-        const contracts = await Contract.find({ spaceId: id });
-        console.log('7. Backend: Contratos encontrados:', contracts.length);
 
-        console.log('8. Backend: Enviando respuesta');
-        res.json({ space, contracts });
+        // Get contracts and enrich them with tenant names
+        const contracts = await Contract.find({ spaceId: id });
+        const contractsWithTenants = await Promise.all(contracts.map(async (contract) => {
+            const tenant = await User.findOne({ dni: contract.tenantDni }).select('firstName lastName');
+            const contractObj = contract.toObject();
+            contractObj.tenantName = tenant ? `${tenant.firstName} ${tenant.lastName}` : 'Unknown';
+            return contractObj;
+        }));
+
+        res.json({ space, contracts: contractsWithTenants });
     } catch (error) {
-        console.error('9. Backend: Error en getSpaceById:', error);
+        console.error('Error in getSpaceById:', error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
 
-/**
- * Update a space (only owner allowed)
- */
+// Update a space (only owner allowed)
 const updateSpace = async (req, res) => {
     try {
         const { id } = req.params;
@@ -80,9 +91,41 @@ const updateSpace = async (req, res) => {
             return res.status(403).json({ error: "Unauthorized: Only the owner can modify this space" });
         }
 
-        Object.assign(space, req.body);
+        // Extract location fields from request body
+        const { municipality, city, address, postalCode, ...otherFields } = req.body;
+
+        // Update fields and reset validation status
+        Object.assign(space, {
+            ...otherFields,
+            municipality,
+            city,
+            address,
+            postalCode,
+            validationStatus: "PENDING"
+        });
+
         await space.save();
-        res.json({ message: "Space updated successfully", space });
+
+        // Notify admins that the space was updated
+        const io = req.app.get('io');
+        if (io) {
+            try {
+                const notificationMessage = `Space [${space._id}] has been updated and requires validation.`;
+                const notificationType = 'SPACE_UPDATED';
+                const notificationTitle = 'Space Updated - Validation Required';
+
+                await io.notifyAdmins(
+                    notificationType,
+                    notificationTitle,
+                    notificationMessage,
+                    space._id
+                );
+            } catch (notificationError) {
+                console.error('Error sending space update notification:', notificationError);
+            }
+        }
+
+        res.json({ message: "Space updated successfully. Waiting for admin validation.", space });
 
     } catch (error) {
         console.error("Error updating space:", error);
@@ -90,9 +133,7 @@ const updateSpace = async (req, res) => {
     }
 };
 
-/**
- * Delete a space (only owner allowed)
- */
+// Delete a space (only owner allowed)
 const deleteSpace = async (req, res) => {
     try {
         const { id } = req.params;
@@ -116,9 +157,7 @@ const deleteSpace = async (req, res) => {
     }
 };
 
-/**
- * Approve or reject a space (admin action)
- */
+// Approve or reject a space (admin only)
 const validateSpace = async (req, res) => {
     try {
         const { id } = req.params;
@@ -132,14 +171,14 @@ const validateSpace = async (req, res) => {
         space.validationStatus = validationStatus;
         await space.save();
 
-        // Send notification to the space owner
+        // Notify owner about validation result
         const io = req.app.get('io');
         if (io) {
             const title = validationStatus === 'APPROVED' ? 'Space Approved!' : 'Space Rejected';
-            const message = validationStatus === 'APPROVED' 
-                ? `Your space ${space.spaceType} has been approved.`
-                : `Your space ${space.spaceType} has been rejected.`;
-            
+            const message = validationStatus === 'APPROVED'
+                ? `Your space [${space._id}] has been approved.`
+                : `Your space [${space._id}] has been rejected. Please review your documents and property information, make any necessary corrections, and try submitting again.`;
+
             await io.notifyUser(
                 space.ownerDni,
                 validationStatus === 'APPROVED' ? 'SPACE_APPROVED' : 'SPACE_REJECTED',
@@ -156,9 +195,7 @@ const validateSpace = async (req, res) => {
     }
 };
 
-/**
- * Get all spaces with pending validation (admin only)
- */
+// Get all spaces that are pending validation (admin only)
 const getPendingSpaces = async (req, res) => {
     try {
         const spaces = await Space.find({ validationStatus: "PENDING" });
@@ -169,9 +206,7 @@ const getPendingSpaces = async (req, res) => {
     }
 };
 
-/**
- * Upload files (gallery and validation documents) for a space
- */
+// Upload files (gallery and validation documents) for a space
 const uploadFilesToSpace = async (req, res) => {
     try {
         const { spaceId } = req.params;
@@ -186,7 +221,7 @@ const uploadFilesToSpace = async (req, res) => {
         }
 
         if (req.files?.validationDocuments) {
-            space.validationDocuments = req.files.validationDocuments.map(file => 
+            space.validationDocuments = req.files.validationDocuments.map(file =>
                 `/uploads/spaces/${spaceId}/validationDocument/${file.filename}`
             );
         }
@@ -200,6 +235,55 @@ const uploadFilesToSpace = async (req, res) => {
     }
 };
 
+// Update monthly earnings for a space based on its active contracts
+const updateMonthlyEarnings = async (spaceId) => {
+    try {
+        const activeContracts = await Contract.find({
+            spaceId: spaceId,
+            contractStatus: 'ACTIVE'
+        });
+
+        const totalEarnings = activeContracts.reduce((sum, contract) => {
+            return sum + (contract.monthlyPayment || 0);
+        }, 0);
+
+        await Space.findByIdAndUpdate(spaceId, {
+            monthlyEarnings: totalEarnings
+        });
+
+        return totalEarnings;
+    } catch (error) {
+        console.error('Error updating monthly earnings:', error);
+        throw error;
+    }
+};
+
+// Get a specific space and its contracts, update earnings
+const getSpace = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ error: "Invalid space ID format" });
+        }
+
+        const space = await Space.findById(id);
+        if (!space) {
+            return res.status(404).json({ error: "Space not found" });
+        }
+
+        const contracts = await Contract.find({ spaceId: id });
+
+        await updateMonthlyEarnings(id);
+        const updatedSpace = await Space.findById(id);
+
+        res.json({ space: updatedSpace, contracts });
+    } catch (error) {
+        console.error('Error getting space:', error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
 module.exports = {
     createSpace,
     getSpaces,
@@ -208,5 +292,6 @@ module.exports = {
     deleteSpace,
     validateSpace,
     getPendingSpaces,
-    uploadFilesToSpace
+    uploadFilesToSpace,
+    getSpace
 };

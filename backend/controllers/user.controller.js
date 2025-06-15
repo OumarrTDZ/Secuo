@@ -7,26 +7,16 @@ const { isValidObjectId } = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 
-// Helper to get relative file path based on uploaded field
-const getRelativePath = (field, req) => {
-    const file = req.files?.[field]?.[0];
-    if (!file) return null;
+// Get relative paths for uploaded files
+const getRelativePath = (fieldname, req) => {
+    if (!req.files || !req.files[fieldname] || !req.files[fieldname][0]) return null;
 
-    let subfolder = '';
-    switch (field) {
-        case 'idFrontPhoto':
-            subfolder = 'idfront';
-            break;
-        case 'idBackPhoto':
-            subfolder = 'idback';
-            break;
-        case 'profilePhoto':
-            subfolder = 'profilephoto';
-            break;
-        default:
-            subfolder = 'misc';
-    }
+    const file = req.files[fieldname][0];
+    const subfolder = fieldname === 'idFrontPhoto' ? 'idfront' :
+                     fieldname === 'idBackPhoto' ? 'idback' :
+                     fieldname === 'profilePhoto' ? 'profilephoto' : 'misc';
 
+    // Construct and return a relative path
     return `/uploads/users/${req.body.dni}/${subfolder}/${file.filename}`;
 };
 
@@ -35,9 +25,15 @@ const registerUser = async (req, res) => {
     try {
         const { dni, firstName, lastName, email, phoneNumber, preference, password } = req.body;
 
+        // Get relative paths for uploaded files
         const idFrontPhoto = getRelativePath('idFrontPhoto', req);
         const idBackPhoto = getRelativePath('idBackPhoto', req);
         const profilePhoto = getRelativePath('profilePhoto', req);
+
+        // Validate required files
+        if (!idFrontPhoto || !idBackPhoto) {
+            return res.status(400).json({ error: 'Both front and back DNI photos are required' });
+        }
 
         // Check if user with email already exists
         const existingUser = await User.findOne({ email });
@@ -46,7 +42,8 @@ const registerUser = async (req, res) => {
         }
 
         // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create new user document
         const user = new User({
@@ -59,7 +56,8 @@ const registerUser = async (req, res) => {
             idFrontPhoto,
             idBackPhoto,
             profilePhoto,
-            password: hashedPassword
+            password: hashedPassword,
+            validationStatus: 'PENDING'
         });
 
         await user.save();
@@ -93,13 +91,29 @@ const loginUser = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: user._id, dni: user.dni },
+            { id: user._id, dni: user.dni, preference: user.preference },
             process.env.JWT_SECRET,
             { expiresIn: "2h" }
         );
 
-        res.json({ message: "Login successful", user, token });
+        // Crear un objeto de usuario con solo los campos necesarios
+        const userResponse = {
+            _id: user._id,
+            dni: user.dni,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            preference: user.preference,
+            validationStatus: user.validationStatus
+        };
+
+        res.json({
+            message: "Login successful",
+            user: userResponse,
+            token
+        });
     } catch (error) {
+        console.error('Login error:', error);
         res.status(500).json({ error: error.message });
     }
 };
@@ -117,26 +131,65 @@ const updateUser = async (req, res) => {
             return res.status(403).json({ error: "Unauthorized: You can only edit your own profile" });
         }
 
-        const updates = req.body;
         const user = await User.findById(id);
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
 
-        Object.keys(updates).forEach(key => {
-            if (key === "password") {
-                user.password = bcrypt.hashSync(updates[key], 10);
-            } else {
-                user[key] = updates[key];
+        const {
+            firstName,
+            lastName,
+            phoneNumber,
+            preference,
+            currentPassword,
+            newPassword,
+            confirmPassword,
+        } = req.body;
+
+        if (firstName) user.firstName = firstName;
+        if (lastName) user.lastName = lastName;
+        if (phoneNumber) user.phoneNumber = phoneNumber;
+        if (preference) user.preference = preference;
+
+        if (newPassword) {
+            if (!currentPassword) {
+                return res.status(400).json({ error: 'Current password is required to change your password' });
             }
+            if (newPassword !== confirmPassword) {
+                return res.status(400).json({ error: 'Passwords do not match' });
+            }
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ error: 'Invalid current password' });
+            }
+            const salt = await bcrypt.genSalt(10);
+            user.password = await bcrypt.hash(newPassword, salt);
+        }
+
+
+        const getRelativePath = (fieldname) => {
+            if (!req.files || !req.files[fieldname]) return null;
+            const file = req.files[fieldname][0];
+            const subfolder = fieldname === 'idFrontPhoto' ? 'idfront'
+                : fieldname === 'idBackPhoto' ? 'idback'
+                    : fieldname === 'profilePhoto' ? 'profilephoto'
+                        : 'misc';
+            return `/uploads/users/${user.dni}/${subfolder}/${file.filename}`;
+        };
+
+        ['profilePhoto', 'idFrontPhoto', 'idBackPhoto'].forEach((field) => {
+            const newPath = getRelativePath(field);
+            if (newPath) user[field] = newPath;
         });
 
         await user.save();
         res.json({ message: "User updated successfully", user });
     } catch (error) {
+        console.error("Update error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
+
 
 // Delete user profile (only user themselves)
 const deleteUser = async (req, res) => {
@@ -162,10 +215,10 @@ const getUserProfile = async (req, res) => {
 // Approve or reject user (admin action)
 const validateUser = async (req, res) => {
     try {
-        const { dni } = req.params;
+        const { id } = req.params;
         const { validationStatus } = req.body;
 
-        const user = await User.findOne({ dni });
+        const user = await User.findById(id);
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
@@ -177,10 +230,10 @@ const validateUser = async (req, res) => {
         const io = req.app.get('io');
         if (io) {
             const title = validationStatus === 'APPROVED' ? 'Account Approved!' : 'Account Rejected';
-            const message = validationStatus === 'APPROVED' 
+            const message = validationStatus === 'APPROVED'
                 ? 'Your account has been approved. You can now use all features of the platform.'
-                : 'Your account has been rejected. Please contact support for more information.';
-            
+                : 'Your account has been rejected. Please review your documents and try again.';
+
             await io.notifyUser(
                 user.dni,
                 validationStatus === 'APPROVED' ? 'USER_APPROVED' : 'USER_REJECTED',
@@ -208,7 +261,7 @@ const getTenantDashboard = async (req, res) => {
         const rentedContracts = await Contract.find({ tenantDni: user.dni }).populate({
             path: "spaceId",
             model: "Space",
-            select: "spaceType monthlyPrice description _id gallery rooms"
+            select: "spaceType monthlyPrice description _id gallery rooms city marking address"
         });
 
         const rentedSpaces = rentedContracts.map(contract => contract.spaceId);
@@ -228,20 +281,36 @@ const getOwnerDashboard = async (req, res) => {
             return res.status(404).json({ error: "User not found." });
         }
 
-        // Get owned spaces
+        // Get owned spaces with all necessary fields
         const ownedSpaces = await Space.find({ ownerDni: user.dni }).select(
-            "spaceType monthlyPrice description _id gallery rooms validationStatus status marking squareMeters"
+            "spaceType monthlyEarnings description _id gallery rooms validationStatus status marking squareMeters municipality city address postalCode floor door"
         );
 
-        // Get contracts count for each space
-        const spacesWithContracts = await Promise.all(ownedSpaces.map(async (space) => {
+        // Get contracts and earnings for each space
+        const spacesWithData = await Promise.all(ownedSpaces.map(async (space) => {
+            // Get all active contracts for this space
+            const activeContracts = await Contract.find({
+                spaceId: space._id,
+                contractStatus: 'ACTIVE'
+            });
+
+            // Calculate total monthly earnings from active contracts
+            const monthlyEarnings = activeContracts.reduce((total, contract) => {
+                return total + (contract.monthlyPayment || 0);
+            }, 0);
+
+            // Get total contracts count
             const contractsCount = await Contract.countDocuments({ spaceId: space._id });
+
+            // Convert to plain object and add the data
             const spaceObj = space.toObject();
             spaceObj.contracts = contractsCount;
+            spaceObj.monthlyEarnings = monthlyEarnings;
+
             return spaceObj;
         }));
 
-        res.json({ user, ownedSpaces: spacesWithContracts });
+        res.json({ user, ownedSpaces: spacesWithData });
     } catch (error) {
         console.error("Error in getOwnerDashboard:", error);
         res.status(500).json({ error: "Internal server error." });
@@ -301,6 +370,27 @@ const updateProfilePhoto = async (req, res) => {
     }
 };
 
+const updateUserPreference  = async (req, res) => {
+    const { preference } = req.body;
+    if (!['OWNER', 'TENANT'].includes(preference)) {
+        return res.status(400).json({ error: 'Invalid preference' });
+    }
+
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { preference },
+            { new: true }
+        ).select('-password');
+
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ error: 'Server error' });
+    }
+}
+
+
+
 module.exports = {
     getOwnerDashboard,
     getTenantDashboard,
@@ -311,5 +401,6 @@ module.exports = {
     getUserProfile,
     validateUser,
     deleteProfilePhoto,
-    updateProfilePhoto
+    updateProfilePhoto,
+    updateUserPreference
 };

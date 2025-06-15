@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+// FINALLY I DONT USE THIS CLASS, I HAVE FUSIONED THE BUILD ATTRIBUTES TO THE SPACE MODEL
 // Schema definition for building details linked to a space
 const BuildingSchema = new mongoose.Schema({
     spaceId: {

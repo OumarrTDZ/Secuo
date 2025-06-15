@@ -8,11 +8,8 @@ const PasswordStrength = ({ password }) => {
         let score = 0;
         if (!pass) return score;
 
-        // Length check
         if (pass.length >= 8) score++;
         if (pass.length >= 12) score++;
-
-        // Complexity checks
         if (/[A-Z]/.test(pass)) score++;
         if (/[0-9]/.test(pass)) score++;
         if (/[^A-Za-z0-9]/.test(pass)) score++;
@@ -24,7 +21,7 @@ const PasswordStrength = ({ password }) => {
     const getColor = () => {
         switch (strength) {
             case 0: return '#ff4444';
-            case 1: return '#ffbb33';
+            case 1:
             case 2: return '#ffbb33';
             case 3: return '#00C851';
             case 4:
@@ -52,54 +49,34 @@ const PasswordStrength = ({ password }) => {
                     <div
                         key={index}
                         className="strength-bar"
-                        style={{
-                            backgroundColor: index < strength ? getColor() : '#e0e0e0',
-                        }}
+                        style={{ backgroundColor: index < strength ? getColor() : '#e0e0e0' }}
                     />
                 ))}
             </div>
-            <span className="strength-label" style={{ color: getColor() }}>
-                {getLabel()}
-            </span>
+            <span className="strength-label" style={{ color: getColor() }}>{getLabel()}</span>
         </div>
     );
 };
 
 const DNIUpload = ({ onFileChange }) => {
-    const [dniFiles, setDniFiles] = useState({
-        idFrontPhoto: null,
-        idBackPhoto: null
-    });
-    const [previews, setPreviews] = useState({
-        idFrontPhoto: null,
-        idBackPhoto: null
-    });
+    const [dniFiles, setDniFiles] = useState({ idFrontPhoto: null, idBackPhoto: null });
+    const [previews, setPreviews] = useState({ idFrontPhoto: null, idBackPhoto: null });
 
     const handleDrop = useCallback((e, side) => {
         e.preventDefault();
         const file = e.dataTransfer?.files[0] || e.target.files[0];
-        
         if (file && file.type.startsWith('image/')) {
             const fieldName = side === 'front' ? 'idFrontPhoto' : 'idBackPhoto';
             setDniFiles(prev => ({ ...prev, [fieldName]: file }));
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviews(prev => ({ ...prev, [fieldName]: reader.result }));
-            };
+            reader.onloadend = () => setPreviews(prev => ({ ...prev, [fieldName]: reader.result }));
             reader.readAsDataURL(file);
             onFileChange(side, file);
         }
     }, [onFileChange]);
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.currentTarget.classList.add('active');
-    };
-
-    const handleDragLeave = (e) => {
-        e.currentTarget.classList.remove('active');
-    };
-
+    const handleDragOver = (e) => e.preventDefault();
+    const handleDragLeave = (e) => e.currentTarget.classList.remove('active');
     const removeFile = (side) => {
         const fieldName = side === 'front' ? 'idFrontPhoto' : 'idBackPhoto';
         setDniFiles(prev => ({ ...prev, [fieldName]: null }));
@@ -109,77 +86,33 @@ const DNIUpload = ({ onFileChange }) => {
 
     return (
         <div className="dni-upload-container">
-            <div className="dni-upload-side">
-                <h4>DNI Frontal</h4>
-                <div
-                    className={`dropzone ${dniFiles.idFrontPhoto ? 'has-file' : ''}`}
-                    onDrop={(e) => handleDrop(e, 'front')}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                >
-                    {previews.idFrontPhoto ? (
-                        <div className="preview-container">
-                            <img src={previews.idFrontPhoto} alt="DNI frontal" />
-                            <button 
-                                type="button" 
-                                className="remove-file"
-                                onClick={() => removeFile('front')}
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ) : (
-                        <>
-                            <p>Arrastra aquí la foto frontal del DNI o</p>
-                            <label className="upload-button">
-                                Seleccionar archivo
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => handleDrop(e, 'front')}
-                                    hidden
-                                />
-                            </label>
-                        </>
-                    )}
+            {[{ side: 'front', label: 'Front of DNI', preview: previews.idFrontPhoto },
+                { side: 'back', label: 'Back of DNI', preview: previews.idBackPhoto }].map(({ side, label, preview }) => (
+                <div className="dni-upload-side" key={side}>
+                    <h4>{label}</h4>
+                    <div
+                        className={`dropzone ${dniFiles[`id${side === 'front' ? 'Front' : 'Back'}Photo`] ? 'has-file' : ''}`}
+                        onDrop={(e) => handleDrop(e, side)}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                    >
+                        {preview ? (
+                            <div className="preview-container">
+                                <img src={preview} alt={`${label}`} />
+                                <button type="button" className="remove-file" onClick={() => removeFile(side)}>×</button>
+                            </div>
+                        ) : (
+                            <>
+                                <p>Drag and drop the {label.toLowerCase()} or</p>
+                                <label className="upload-button">
+                                    Select file
+                                    <input type="file" accept="image/*" onChange={(e) => handleDrop(e, side)} hidden />
+                                </label>
+                            </>
+                        )}
+                    </div>
                 </div>
-            </div>
-
-            <div className="dni-upload-side">
-                <h4>DNI Trasero</h4>
-                <div
-                    className={`dropzone ${dniFiles.idBackPhoto ? 'has-file' : ''}`}
-                    onDrop={(e) => handleDrop(e, 'back')}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                >
-                    {previews.idBackPhoto ? (
-                        <div className="preview-container">
-                            <img src={previews.idBackPhoto} alt="DNI trasero" />
-                            <button 
-                                type="button" 
-                                className="remove-file"
-                                onClick={() => removeFile('back')}
-                            >
-                                ×
-                            </button>
-                        </div>
-                    ) : (
-                        <>
-                            <p>Arrastra aquí la foto trasera del DNI o</p>
-                            <label className="upload-button">
-                                Seleccionar archivo
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => handleDrop(e, 'back')}
-                                    hidden
-                                />
-                            </label>
-                        </>
-                    )}
-                </div>
-            </div>
+            ))}
         </div>
     );
 };
@@ -190,27 +123,16 @@ const ProfilePhotoUpload = ({ onFileChange, currentPhoto }) => {
     const handleDrop = useCallback((e) => {
         e.preventDefault();
         const file = e.dataTransfer?.files[0] || e.target.files[0];
-        
         if (file && file.type.startsWith('image/')) {
             onFileChange(file);
-            
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreview(reader.result);
-            };
+            reader.onloadend = () => setPreview(reader.result);
             reader.readAsDataURL(file);
         }
     }, [onFileChange]);
 
-    const handleDragOver = (e) => {
-        e.preventDefault();
-        e.currentTarget.classList.add('active');
-    };
-
-    const handleDragLeave = (e) => {
-        e.currentTarget.classList.remove('active');
-    };
-
+    const handleDragOver = (e) => e.preventDefault();
+    const handleDragLeave = (e) => e.currentTarget.classList.remove('active');
     const removePhoto = () => {
         onFileChange(null);
         setPreview(null);
@@ -226,29 +148,18 @@ const ProfilePhotoUpload = ({ onFileChange, currentPhoto }) => {
             >
                 {preview ? (
                     <div className="profile-preview-container">
-                        <img src={preview} alt="Foto de perfil" className="profile-preview" />
-                        <button 
-                            type="button" 
-                            className="profile-remove-button"
-                            onClick={removePhoto}
-                        >
-                            ×
-                        </button>
+                        <img src={preview} alt="Profile Photo" className="profile-preview" />
+                        <button type="button" className="profile-remove-button" onClick={removePhoto}>×</button>
                     </div>
                 ) : (
                     <>
                         <div className="profile-placeholder">
                             <i className="fas fa-user"></i>
                         </div>
-                        <p>Arrastra aquí tu foto de perfil o</p>
+                        <p>Drag and drop your profile photo or</p>
                         <label className="upload-button">
-                            Seleccionar archivo
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleDrop}
-                                hidden
-                            />
+                            Select file
+                            <input type="file" accept="image/*" onChange={handleDrop} hidden />
                         </label>
                     </>
                 )}
@@ -260,17 +171,9 @@ const ProfilePhotoUpload = ({ onFileChange, currentPhoto }) => {
 const Register = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phoneNumber: '',
-        dni: '',
-        password: '',
-        confirmPassword: '',
-        preference: 'TENANT',
-        idFrontPhoto: null,
-        idBackPhoto: null,
-        profilePhoto: null
+        firstName: '', lastName: '', email: '', phoneNumber: '', dni: '',
+        password: '', confirmPassword: '', preference: 'TENANT',
+        idFrontPhoto: null, idBackPhoto: null, profilePhoto: null
     });
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -281,17 +184,11 @@ const Register = () => {
     };
 
     const handleDNIFileChange = (side, file) => {
-        setFormData(prev => ({
-            ...prev,
-            [side === 'front' ? 'idFrontPhoto' : 'idBackPhoto']: file
-        }));
+        setFormData(prev => ({ ...prev, [side === 'front' ? 'idFrontPhoto' : 'idBackPhoto']: file }));
     };
 
     const handleProfilePhotoChange = (file) => {
-        setFormData(prev => ({
-            ...prev,
-            profilePhoto: file
-        }));
+        setFormData(prev => ({ ...prev, profilePhoto: file }));
     };
 
     const handleSubmit = async (e) => {
@@ -300,12 +197,12 @@ const Register = () => {
         setSuccess('');
 
         if (!formData.idFrontPhoto || !formData.idBackPhoto) {
-            setError('Por favor, sube ambas fotos del DNI');
+            setError('Please upload both sides of the DNI');
             return;
         }
 
         if (formData.password !== formData.confirmPassword) {
-            setError('Las contraseñas no coinciden');
+            setError('Passwords do not match');
             return;
         }
 
@@ -317,16 +214,14 @@ const Register = () => {
                 }
             });
 
-            const response = await axios.post('http://localhost:5000/api/users/register', formDataToSend, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            await axios.post('http://localhost:5000/api/users/register', formDataToSend, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
-            
-            setSuccess('¡Registro exitoso! Redirigiendo al login...');
+
+            setSuccess('Registration successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 2000);
         } catch (error) {
-            setError(error.response?.data?.error || 'Error en el registro. Por favor, inténtalo de nuevo.');
+            setError(error.response?.data?.error || 'Registration error. Please try again.');
         }
     };
 
@@ -334,8 +229,8 @@ const Register = () => {
         <div className="register-page">
             <div className="register-container">
                 <div className="register-header">
-                    <h2>Crear tu cuenta</h2>
-                    <p>Únete a SECUO hoy y experimenta la gestión moderna de propiedades.</p>
+                    <h2>Create Your Account</h2>
+                    <p>Join SECUO today and experience modern property management.</p>
                 </div>
 
                 <form className="register-form" onSubmit={handleSubmit}>
@@ -343,129 +238,64 @@ const Register = () => {
                     {success && <div className="success-message">{success}</div>}
 
                     <div className="form-group">
-                        <label htmlFor="firstName" className="required">Nombre</label>
-                        <input
-                            type="text"
-                            id="firstName"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            required
-                            placeholder="Ingresa tu nombre"
-                        />
+                        <label htmlFor="firstName" className="required">First Name</label>
+                        <input type="text" id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="Enter your first name" />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="lastName" className="required">Apellidos</label>
-                        <input
-                            type="text"
-                            id="lastName"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            required
-                            placeholder="Ingresa tus apellidos"
-                        />
+                        <label htmlFor="lastName" className="required">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Enter your last name" />
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="email" className="required">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                            placeholder="Ingresa tu email"
-                        />
+                        <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required placeholder="Enter your email" />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="phoneNumber" className="required">Teléfono</label>
-                        <input
-                            type="tel"
-                            id="phoneNumber"
-                            name="phoneNumber"
-                            value={formData.phoneNumber}
-                            onChange={handleChange}
-                            required
-                            placeholder="Ingresa tu número de teléfono"
-                        />
+                        <label htmlFor="phoneNumber" className="required">Phone Number</label>
+                        <input type="tel" id="phoneNumber" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required placeholder="Enter your phone number" />
                     </div>
 
                     <div className="form-group">
                         <label htmlFor="dni" className="required">DNI</label>
-                        <input
-                            type="text"
-                            id="dni"
-                            name="dni"
-                            value={formData.dni}
-                            onChange={handleChange}
-                            required
-                            placeholder="Ingresa tu DNI"
-                        />
+                        <input type="text" id="dni" name="dni" value={formData.dni} onChange={handleChange} required placeholder="Enter your DNI" />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="preference" className="required">Soy un</label>
-                        <select
-                            id="preference"
-                            name="preference"
-                            value={formData.preference}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="TENANT">Inquilino</option>
-                            <option value="OWNER">Propietario</option>
+                        <label htmlFor="preference" className="required">I am a</label>
+                        <select id="preference" name="preference" value={formData.preference} onChange={handleChange} required>
+                            <option value="TENANT">Tenant</option>
+                            <option value="OWNER">Owner</option>
                         </select>
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password" className="required">Contraseña</label>
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                            placeholder="Crea una contraseña"
-                        />
+                        <label htmlFor="password" className="required">Password</label>
+                        <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required placeholder="Create a password" />
                         <PasswordStrength password={formData.password} />
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="confirmPassword" className="required">Confirmar Contraseña</label>
-                        <input
-                            type="password"
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            required
-                            placeholder="Confirma tu contraseña"
-                        />
+                        <label htmlFor="confirmPassword" className="required">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required placeholder="Confirm your password" />
                     </div>
 
                     <div className="form-group full-width">
-                        <label className="required">Fotos del DNI</label>
+                        <label className="required">DNI Photos</label>
                         <DNIUpload onFileChange={handleDNIFileChange} />
                     </div>
 
                     <div className="form-group full-width">
-                        <label>Foto de Perfil (Opcional)</label>
-                        <ProfilePhotoUpload 
-                            onFileChange={handleProfilePhotoChange}
-                            currentPhoto={formData.profilePhoto}
-                        />
+                        <label>Profile Photo (Optional)</label>
+                        <ProfilePhotoUpload onFileChange={handleProfilePhotoChange} currentPhoto={formData.profilePhoto} />
                     </div>
 
-                    <button type="submit">Crear Cuenta</button>
+                    <button type="submit">Create Account</button>
                 </form>
 
                 <div className="login-link">
-                    ¿Ya tienes una cuenta?<Link to="/login">Inicia sesión aquí</Link>
+                    Already have an account? <Link to="/login">Log in here</Link>
                 </div>
             </div>
         </div>

@@ -1,60 +1,59 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { documentFileFilter, imageFileFilter } = require('./fileValidation');
 
+// Configure storage
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const dni = req.params.dni || req.body.dni;
+    destination: function (req, file, cb) {
+        const dni = req.body.dni;
         if (!dni) {
-            return cb(new Error('DNI parameter is required'));
+            return cb(new Error('DNI is required'));
         }
 
-        let subfolder;
+        // Set storage destination based on file type
+        let destination = '';
         switch (file.fieldname) {
-            case 'profilePhoto':
-                subfolder = 'profilephoto';
+            case 'idFrontPhoto':
+                destination = path.join('public/uploads/users', dni, 'idfront');
                 break;
-            case 'dniFrontPhoto':
-            case 'dniBackPhoto':
-                subfolder = file.fieldname.toLowerCase();
+            case 'idBackPhoto':
+                destination = path.join('public/uploads/users', dni, 'idback');
+                break;
+            case 'profilePhoto':
+                destination = path.join('public/uploads/users', dni, 'profilephoto');
                 break;
             default:
-                return cb(new Error('Invalid field name'));
+                destination = path.join('public/uploads/users', dni, 'misc');
         }
 
-        const uploadPath = path.join(__dirname, '..', 'uploads', 'users', dni, subfolder);
-
-        try {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        } catch (error) {
-            return cb(error);
-        }
-
-        cb(null, uploadPath);
+        // Create directory if it doesn't exist
+        fs.mkdirSync(destination, { recursive: true });
+        cb(null, destination);
     },
-
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname);
+    filename: function (req, file, cb) {
+        // Generate a unique filename with timestamp
         const timestamp = Date.now();
-        const safeFieldname = file.fieldname.replace(/\s+/g, '_');
-        cb(null, `${timestamp}-${safeFieldname}${ext}`);
+        const ext = path.extname(file.originalname);
+        cb(null, `${timestamp}${ext}`);
     }
 });
 
+// File filter
 const fileFilter = (req, file, cb) => {
-    if (file.fieldname === 'profilePhoto') {
-        imageFileFilter(req, file, cb);
-    } else if (['dniFrontPhoto', 'dniBackPhoto'].includes(file.fieldname)) {
-        documentFileFilter(req, file, cb);
-    } else {
-        cb(new Error('Invalid field name'));
+    // Accept images only
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
+        return cb(new Error('Only image files are allowed!'), false);
     }
+    cb(null, true);
 };
 
-const uploadUserFiles = multer({ 
-    storage,
-    fileFilter
+// Export the configured multer middleware
+const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024 // 5MB limit
+    }
 });
 
-module.exports = { uploadUserFiles }; 
+module.exports = upload; 

@@ -65,10 +65,13 @@ const ContractSchema = new mongoose.Schema({
     },
     contractStatus: {
         type: String,
-        enum: ["ACTIVE", "EXPIRED"],
+        enum: ["ACTIVE", "EXPIRED", "TERMINATED"],
         required: true,
         default: "ACTIVE"
-        // Contract lifecycle status
+        // Contract lifecycle status:
+        // ACTIVE: Contract is currently in force
+        // EXPIRED: Contract reached its natural end date
+        // TERMINATED: Contract ended before its natural end date
     },
     contractDocument: [{
         path: {

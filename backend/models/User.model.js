@@ -43,17 +43,16 @@ const userSchema = new mongoose.Schema({
     },
     preference: {
         type: String,
-        enum: ["OWNER", "TENANT"],
+        enum: ['TENANT', 'OWNER'],
         required: true
-        // User role preference: owner or tenant
     },
-    dniFrontPhoto: {
+    idFrontPhoto: {
         type: String,
-        // URL or path to front photo of DNI
+        required: true
     },
-    dniBackPhoto: {
+    idBackPhoto: {
         type: String,
-        // URL or path to back photo of DNI
+        required: true
     },
     profilePhoto: {
         type: String,

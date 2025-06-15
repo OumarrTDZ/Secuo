@@ -41,7 +41,6 @@ const createContract = async (req, res) => {
             return res.status(400).json({ error: "This tenant already has an active contract for this space" });
         }
 
-
         // Create and save the contract
         const contract = new Contract({
             spaceId,
@@ -56,6 +55,29 @@ const createContract = async (req, res) => {
         });
 
         await contract.save();
+
+        // Send notification to tenant about new contract
+        const io = req.app.get('io');
+        if (io) {
+            try {
+                const spaceIdentifier = `${space.spaceType} at ${space.address}`;
+                const notificationMessage = `NEW CONTRACT - You have been assigned a new contract for the ${spaceIdentifier} (Contract ID: ${contract._id})`;
+                const notificationType = 'CONTRACT_CREATED';
+                const notificationTitle = 'New Contract Assigned';
+
+                // Notify tenant
+                await io.notifyUser(
+                    tenantDni,
+                    notificationType,
+                    notificationTitle,
+                    notificationMessage,
+                    contract._id
+                );
+            } catch (notificationError) {
+                console.error('Error sending new contract notification:', notificationError);
+                // Continue even if notification fails
+            }
+        }
 
         res.status(201).json({ message: "Contract created successfully", contract });
     } catch (error) {
@@ -93,52 +115,142 @@ const updateContract = async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
 
-        // If there's a document to delete
-        if (updates.documentToDelete) {
-            const contract = await Contract.findById(id);
-            if (!contract) {
-                return res.status(404).json({ message: 'Contract not found' });
-            }
-
-            // Find the document index
-            const documentIndex = contract.contractDocument.findIndex(doc => 
-                doc.includes(updates.documentToDelete)
-            );
-
-            if (documentIndex === -1) {
-                return res.status(404).json({ message: 'Document not found' });
-            }
-
-            // Get the document path and remove from array
-            const documentPath = contract.contractDocument[documentIndex];
-            contract.contractDocument.splice(documentIndex, 1);
-
-            // Delete the physical file
-            const filePath = path.join(__dirname, '..', documentPath);
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-
-            // Save the contract
-            await contract.save();
-            return res.json({ message: 'Document deleted successfully' });
+        if (!isValidObjectId(id)) {
+            return res.status(400).json({ error: "Invalid ID format" });
         }
 
-        // Regular contract update
-        const contract = await Contract.findByIdAndUpdate(
-            id,
-            updates,
-            { new: true }
-        );
-
+        const contract = await Contract.findById(id);
         if (!contract) {
-            return res.status(404).json({ message: 'Contract not found' });
+            return res.status(404).json({ error: "Contract not found" });
         }
 
-        res.json(contract);
+        // Only owner or admin can update contract
+        if (req.user.role !== "ADMIN" && req.user.dni !== contract.ownerDni) {
+            return res.status(403).json({ error: "Unauthorized: Only the owner or admin can modify this contract" });
+        }
+
+        // Update contract fields
+        Object.keys(updates).forEach(key => {
+            if (key !== '_id' && key !== 'ownerDni' && key !== 'spaceId') {
+                console.log(`Updating field ${key} from ${contract[key]} to ${updates[key]}`);
+                contract[key] = updates[key];
+            }
+        });
+
+        // Set validation status back to pending if the user is not an admin
+        if (req.user.role !== "ADMIN") {
+            contract.validationStatus = "PENDING";
+        }
+
+        // If contract status is being updated to EXPIRED or TERMINATED
+        if (updates.contractStatus === 'EXPIRED' || updates.contractStatus === 'TERMINATED') {
+            console.log('Contract status changing to:', updates.contractStatus);
+            
+            try {
+                // Update the space's monthly earnings
+                const space = await Space.findById(contract.spaceId);
+                if (space) {
+                    const activeContracts = await Contract.find({
+                        spaceId: space._id,
+                        contractStatus: 'ACTIVE'
+                    });
+
+                    // Calculate new monthly earnings (excluding this contract)
+                    const monthlyEarnings = activeContracts
+                        .filter(c => c._id.toString() !== id)
+                        .reduce((sum, c) => sum + (c.monthlyPayment || 0), 0);
+
+                    console.log('Updating space monthly earnings to:', monthlyEarnings);
+                    
+                    // Update space
+                    await Space.findByIdAndUpdate(space._id, { monthlyEarnings });
+                } else {
+                    console.error('Space not found for contract:', contract.spaceId);
+                }
+            } catch (spaceError) {
+                console.error('Error updating space monthly earnings:', spaceError);
+                // Continue with contract update even if space update fails
+            }
+        }
+
+        // Validate the contract before saving
+        await contract.validate();
+
+        // Save the updated contract
+        await contract.save();
+        console.log('Contract saved. New status:', contract.contractStatus);
+
+        // Send notifications for contract updates
+        const io = req.app.get('io');
+        if (io) {
+            try {
+                let notificationMessage = '';
+                let notificationType = '';
+                let notificationTitle = '';
+
+                // Get space details for better messages
+                const space = await Space.findById(contract.spaceId);
+                const spaceIdentifier = space ? 
+                    `${space.spaceType} at ${space.address}` : 
+                    'space';
+
+                // If updated by owner, notify admin about required validation
+                if (req.user.role !== "ADMIN") {
+                    notificationMessage = `Contract [${contract._id}] for ${spaceIdentifier} has been updated and requires validation.`;
+                    notificationType = 'CONTRACT_UPDATED';
+                    notificationTitle = 'Contract Updated - Validation Required';
+
+                    // Notify admins
+                    await io.notifyAdmins(
+                        notificationType,
+                        notificationTitle,
+                        notificationMessage,
+                        contract._id
+                    );
+                } else {
+                    // Create notification based on contract status
+                    const statusMessages = {
+                        'ACTIVE': 'ACTIVE',
+                        'EXPIRED': 'EXPIRED',
+                        'TERMINATED': 'TERMINATED'
+                    };
+
+                    const statusText = statusMessages[updates.contractStatus] || 'UPDATED';
+                    notificationMessage = `${statusText} - Your contract for the ${spaceIdentifier} has been updated (Contract ID: ${contract._id})`;
+                    notificationType = 'CONTRACT_' + (updates.contractStatus || 'UPDATED');
+                    notificationTitle = `Contract ${statusText}`;
+
+                    // Notify owner and tenant
+                    await io.notifyUser(
+                        contract.ownerDni,
+                        notificationType,
+                        notificationTitle,
+                        notificationMessage,
+                        contract._id
+                    );
+
+                    await io.notifyUser(
+                        contract.tenantDni,
+                        notificationType,
+                        notificationTitle,
+                        notificationMessage,
+                        contract._id
+                    );
+                }
+            } catch (notificationError) {
+                console.error('Error sending contract update notification:', notificationError);
+                // Continue even if notification fails
+            }
+        }
+
+        const message = req.user.role !== "ADMIN" 
+            ? "Contract updated successfully. Waiting for admin validation."
+            : "Contract updated successfully.";
+
+        res.json({ message, contract });
     } catch (error) {
-        console.error('Error updating contract:', error);
-        res.status(500).json({ message: 'Error updating contract' });
+        console.error("Error updating contract:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 };
 
@@ -157,9 +269,48 @@ const deleteContract = async (req, res) => {
             return res.status(403).json({ error: "Unauthorized: Only the owner or admin can delete this contract" });
         }
 
-        await Contract.findByIdAndDelete(id);
-        res.json({ message: "Contract deleted successfully" });
+        // Get space details before deleting the contract
+        const space = await Space.findById(contract.spaceId);
+        const spaceIdentifier = space ? 
+            `${space.spaceType} at ${space.address}` : 
+            'space';
 
+        await Contract.findByIdAndDelete(id);
+
+        // Send notification to both owner and tenant
+        const io = req.app.get('io');
+        if (io) {
+            try {
+                const notificationMessage = `DELETED - Contract for the ${spaceIdentifier} has been deleted (Contract ID: ${contract._id})`;
+                const notificationType = 'CONTRACT_DELETED';
+                const notificationTitle = 'Contract Deleted';
+
+                // Notify tenant
+                await io.notifyUser(
+                    contract.tenantDni,
+                    notificationType,
+                    notificationTitle,
+                    notificationMessage,
+                    contract._id
+                );
+
+                // Notify owner (if not the one who deleted it)
+                if (req.user.dni !== contract.ownerDni) {
+                    await io.notifyUser(
+                        contract.ownerDni,
+                        notificationType,
+                        notificationTitle,
+                        notificationMessage,
+                        contract._id
+                    );
+                }
+            } catch (notificationError) {
+                console.error('Error sending delete notifications:', notificationError);
+                // Continue even if notifications fail
+            }
+        }
+
+        res.json({ message: "Contract deleted successfully" });
     } catch (error) {
         console.error("Error deleting contract:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -218,8 +369,8 @@ const validateContract = async (req, res) => {
         if (io) {
             const title = validationStatus === 'APPROVED' ? 'Contract Approved!' : 'Contract Rejected';
             const message = validationStatus === 'APPROVED' 
-                ? `Your contract has been approved.`
-                : `Your contract has been rejected.`;
+                ? `Your contract [${contract._id}] has been approved.`
+                : `Your contract [${contract._id}] has been rejected. Please review all contract terms and documents, ensure everything is correct, and try submitting again.`;
             
             // Notify owner
             await io.notifyUser(
@@ -247,9 +398,7 @@ const validateContract = async (req, res) => {
     }
 };
 
-/**
- * Upload contract document images to /uploads/contracts/{contractId}
- */
+ // Upload contract document images to /uploads/contracts/{contractId}
 const uploadFilesToContract = async (req, res) => {
     try {
         const { contractId } = req.params;

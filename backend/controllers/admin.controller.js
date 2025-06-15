@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Admin = require("../models/Admin.model");
 const User = require("../models/User.model");
-//more laterr i have to create a default admin to access
+
 // Register a new admin (only accessible to other admins)
 const registerAdmin = async (req, res) => {
     try {

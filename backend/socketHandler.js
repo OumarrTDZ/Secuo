@@ -1,52 +1,84 @@
-const { sendMessage, markDelivered, markRead, deleteMessage, reactMessage } = require('./controllers/message.controller');
+const jwt = require('jsonwebtoken');
 const { createNotification } = require('./controllers/notification.controller');
 
-const socketHandler = (io) => {
+module.exports = (io) => {
+    // Store active connections
+    const activeConnections = new Map();
+
     io.on('connection', (socket) => {
-        console.log(`User connected: ${socket.id}`);
+        console.log('New socket connection');
 
-        // Join user's personal notification room
-        socket.on('joinNotifications', (userDni) => {
-            socket.join(`notifications:${userDni}`);
-            console.log(`User ${userDni} joined their notification room`);
+        socket.on('joinNotifications', async (data) => {
+            try {
+                const { dni, token } = data;
+                
+                // Verify token
+                jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+                    if (err || decoded.dni !== dni) {
+                        socket.emit('error', { message: 'Authentication failed' });
+                        return;
+                    }
+
+                    // Join notification room
+                    const room = `notifications:${dni}`;
+                    socket.join(room);
+                    activeConnections.set(socket.id, { dni, room });
+                    
+                    socket.emit('joinedNotifications', { 
+                        message: 'Successfully joined notifications room',
+                        room 
+                    });
+                });
+            } catch (error) {
+                console.error('Error joining notifications:', error);
+                socket.emit('error', { message: 'Failed to join notifications' });
+            }
         });
 
-        socket.on('joinChat', (conversationId) => {
-            socket.join(conversationId);
-            console.log(`User ${socket.id} joined chat ${conversationId}`);
-            markDelivered(socket, conversationId);
+        // --- CHAT SOCKET LOGIC ---
+        socket.on('joinChat', (data) => {
+            const { conversationId } = data;
+            if (conversationId) {
+                socket.join(conversationId);
+                socket.emit('joinedChat', { conversationId });
+            }
         });
 
+        // manage message sents
         socket.on('sendMessage', async (messageData) => {
-            await sendMessage(socket, messageData);
-        });
+            try {
 
-        socket.on('messageRead', async (conversationId) => {
-            await markRead(socket, conversationId);
-        });
-
-        socket.on('deleteMessage', async ({ messageId, senderDni }) => {
-            await deleteMessage(socket, messageId, senderDni);
-        });
-
-        socket.on('reactMessage', async ({ messageId, emoji }) => {
-            await reactMessage(socket, { messageId, emoji });
+                const { sendMessage } = require('./controllers/message.controller');
+                await sendMessage(socket, messageData);
+            } catch (error) {
+                console.error('Error in sendMessage socket event:', error);
+                socket.emit('error', { message: 'Failed to send message' });
+            }
         });
 
         socket.on('disconnect', () => {
-            console.log(`User disconnected: ${socket.id}`);
+            const connection = activeConnections.get(socket.id);
+            if (connection) {
+                activeConnections.delete(socket.id);
+            }
+            console.log('Client disconnected');
         });
     });
 
-    // Function to emit notification to a specific user
+    // Add notifyUser as a method of io
     io.notifyUser = async (userDni, type, title, message, relatedId = null) => {
         try {
+            console.log(`Creating notification for user ${userDni}:`, { type, title });
             const notification = await createNotification(userDni, type, title, message, relatedId);
-            io.to(`notifications:${userDni}`).emit('newNotification', notification);
+            const room = `notifications:${userDni}`;
+            console.log(`Emitting notification to room: ${room}`);
+            io.to(room).emit('newNotification', notification);
+            return notification;
         } catch (error) {
             console.error('Error sending notification:', error);
+            throw error;
         }
     };
-};
 
-module.exports = socketHandler;
+    return io;
+};

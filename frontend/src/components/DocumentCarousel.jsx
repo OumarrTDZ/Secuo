@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination } from 'swiper/modules';
 
-// Import Swiper styles
+// using Swiper styles instead of meritxell Owl carrusel, yep
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -20,30 +20,75 @@ const DocumentCarousel = ({ documents, type, id }) => {
     }
 
     const getDocumentUrl = (document) => {
-        const baseUrl = 'http://localhost:5000';
-        if (document.startsWith('/uploads/')) {
-            return `${baseUrl}${document}`;
+        // If document is null or undefined, return a default URL
+        if (!document) {
+            console.error('Invalid document:', document);
+            return '/assets/defaultDocument.png';
         }
 
+        const baseUrl = 'http://localhost:5000';
+
+        // If document is an object with a path property, use that
+        if (typeof document === 'object' && document.path) {
+            const path = document.path.startsWith('/') ? document.path : `/${document.path}`;
+            return `${baseUrl}${path}`;
+        }
+
+        // Convert document to string to handle any non-string values
+        const docString = String(document);
+
+        // If it's already a full URL, return it as is
+        if (docString.startsWith('http')) {
+            return docString;
+        }
+
+        // If it's a full local file path, extract just the relative path from 'uploads/'
+        if (docString.includes('uploads')) {
+            const uploadPath = docString.split('uploads/')[1];
+            return `${baseUrl}/uploads/${uploadPath}`;
+        }
+
+        // If it's already a relative path starting with /uploads, just add the base URL
+        if (docString.startsWith('/uploads/')) {
+            return `${baseUrl}${docString}`;
+        }
+
+        // Otherwise, construct the URL based on the type
         switch (type) {
             case 'space':
-                return `${baseUrl}/uploads/spaces/${id}/validationDocument/${document}`;
+                return `${baseUrl}/uploads/spaces/${id}/validationDocument/${docString}`;
             case 'contract':
-                return `${baseUrl}/uploads/contracts/${id}/contractDocument/${document}`;
+                return `${baseUrl}/uploads/contracts/${id}/contractDocument/${docString}`;
             case 'user':
-                return `${baseUrl}/uploads/users/${id}/${document}`;
+                // Extract just the filename if a full path is provided
+                const filename = docString.split('/').pop();
+                return `${baseUrl}/uploads/users/${id}/${docString.includes('idfront') ? 'idfront' : 'idback'}/${filename}`;
             default:
-                return `${baseUrl}${document}`;
+                return `${baseUrl}${docString}`;
         }
     };
 
-    const isImageFile = (filename) => {
+    const isImageFile = (document) => {
+        if (!document) return false;
+
+        // If document is an object with a path property, use that
+        const filename = typeof document === 'object' && document.path
+            ? document.path
+            : String(document);
+
         const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif'];
         const ext = '.' + filename.split('.').pop().toLowerCase();
         return imageExtensions.includes(ext);
     };
 
-    const getFileIcon = (filename) => {
+    const getFileIcon = (document) => {
+        if (!document) return '📎';
+
+        // If document is an object with a path property, use that
+        const filename = typeof document === 'object' && document.path
+            ? document.path
+            : String(document);
+
         const ext = filename.split('.').pop().toLowerCase();
         switch (ext) {
             case 'pdf':
@@ -61,7 +106,14 @@ const DocumentCarousel = ({ documents, type, id }) => {
         }
     };
 
-    const getFileType = (filename) => {
+    const getFileType = (document) => {
+        if (!document) return 'Document';
+
+        // If document is an object with a path property, use that
+        const filename = typeof document === 'object' && document.path
+            ? document.path
+            : String(document);
+
         const ext = filename.split('.').pop().toLowerCase();
         switch (ext) {
             case 'pdf':
@@ -134,7 +186,7 @@ const DocumentCarousel = ({ documents, type, id }) => {
                                             </div>
                                             <div className="document-info">
                                                 <span className="document-type">{getFileType(doc)}</span>
-                                                <a 
+                                                <a
                                                     href={docUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
@@ -160,7 +212,7 @@ const DocumentCarousel = ({ documents, type, id }) => {
                             alt="Full size document"
                             className="fullscreen-document"
                         />
-                        <button 
+                        <button
                             className="close-fullscreen"
                             onClick={() => setFullscreenDoc(null)}
                         >

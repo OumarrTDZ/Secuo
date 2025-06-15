@@ -26,7 +26,7 @@ import SidebarLeft from './components/SidebarLeft';
 import SidebarRight from './components/SidebarRight';
 import axios from 'axios';
 
-// Layout para usuarios normales
+// Layout for usual users
 const UserLayout = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -80,7 +80,7 @@ const UserLayout = ({ children }) => {
     );
 };
 
-// Layout para administradores (sin sidebars ni navbar)
+// Layout for administrators
 const AdminLayout = ({ children }) => {
     return <div className="admin-layout">{children}</div>;
 };
@@ -88,12 +88,12 @@ const AdminLayout = ({ children }) => {
 function AppContent() {
     const location = useLocation();
     
-    // Rutas que son para administradores
+    // admin routes
     const isAdminRoute = (path) => {
         return ['/admin-login', '/admin-dashboard', '/admin-validation'].includes(path);
     };
 
-    // Rutas públicas que no necesitan layout
+    // public routes that doesnt need layoutttt
     const isPublicRoute = (path) => {
         return ['/', '/login', '/register'].includes(path);
     };
@@ -111,17 +111,17 @@ function AppContent() {
     return (
         <PreferenceProvider>
             <Routes>
-                {/* Rutas públicas */}
+                {/* Public routes */}
                 <Route path="/" element={<Home />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
 
-                {/* Rutas de administrador */}
+                {/* admin routes */}
                 <Route path="/admin-login" element={<AdminLogin />} />
                 <Route path="/admin-dashboard" element={getLayout(<AdminDashboard />)} />
                 <Route path="/admin-validation" element={getLayout(<AdminValidation />)} />
 
-                {/* Rutas de usuario */}
+                {/* user routes */}
                 <Route path="/dashboard" element={getLayout(<Dashboard />)} />
                 <Route path="/dashboard-tenant" element={getLayout(<DashboardTenant />)} />
                 <Route path="/dashboard-owner" element={getLayout(<DashboardOwner />)} />

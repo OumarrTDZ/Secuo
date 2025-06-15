@@ -1,0 +1,626 @@
+/*mi idea principal era usar tailwind y no pude descargarlo por mas que li untentaba en el proyecto, asi que tire por css puro
+ del cual iba probando plantillas de la ia e iba realizando los cambios y adiciones que me parecian mejor */
+.space-details-container {
+    max-width: 1200px;
+    margin: 0 auto 0 160px;
+    padding: 32px;
+}
+
+.space-details-header {
+    background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px #0001;
+    padding: 0 40px;
+    height: 90px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    border: 1px solid #e2e8f0cc;
+}
+
+.space-details-header h1 {
+    font-size: 26px;
+    color: #1a202c;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+}
+
+.space-actions {
+    position: absolute;
+    right: 40px;
+    top: 55%;
+    transform: translateY(-13%);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.edit-button, .delete-button {
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px #0001;
+    transition: background .2s;
+}
+
+.edit-button {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    color: #0369a1;
+}
+
+.edit-button:hover {
+    background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);
+}
+
+.delete-button {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #dc2626;
+}
+
+.delete-button:hover {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+}
+
+.space-details-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px #0002;
+    margin-bottom: 32px;
+    border: 1px solid #e2e8f0cc;
+    overflow: hidden;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 32px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f099;
+    transition: box-shadow .3s;
+}
+
+.detail-item:hover {
+    box-shadow: 0 4px 12px #0001;
+}
+
+.full-width {
+    grid-column: 1 / -1 !important;
+}
+
+.detail-label {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-value {
+    font-size: 15px;
+    color: #1e293b;
+    font-weight: 500;
+}
+
+.detail-item.type {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #93c5fd;
+}
+
+.detail-item.type .detail-value {
+    color: #1e40af;
+    font-weight: 600;
+}
+
+.detail-item.earnings .detail-value {
+    color: #059669;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.detail-item.description {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+    padding: 24px;
+}
+
+.detail-item.description .detail-label {
+    margin-bottom: 12px;
+}
+
+.detail-item.description .detail-value {
+    line-height: 1.6;
+    white-space: pre-wrap;
+    min-height: 80px;
+}
+
+.space-gallery-container {
+    width: 100%;
+    padding: 0;
+    margin-bottom: 40px;
+}
+
+.space-gallery {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px #0002;
+    border: 1px solid #e2e8f0cc;
+    overflow: hidden;
+    position: relative;
+}
+
+.large-gallery .carousel-container {
+    width: 100%;
+    height: 500px;
+    position: relative;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+.large-gallery .carousel-slide {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity .5s;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+}
+
+.large-gallery .carousel-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #fffF;
+    border: 1px solid #e0f2fe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .3s;
+    z-index: 10;
+    box-shadow: 0 8px 24px #0002;
+}
+
+.large-gallery .carousel-button:hover {
+    background: #fff;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.large-gallery .carousel-button.prev {
+    left: 40px;
+}
+
+.large-gallery .carousel-button.next {
+    right: 40px;
+}
+
+@media (max-width: 1440px) {
+    .large-gallery .carousel-container {
+        height: 400px;
+    }
+}
+
+@media (max-width: 1024px) {
+    .large-gallery .carousel-container {
+        height: 350px;
+    }
+
+    .details-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        padding: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .large-gallery .carousel-container {
+        height: 250px;
+    }
+
+    .large-gallery .carousel-button {
+        width: 56px;
+        height: 56px;
+    }
+
+    .large-gallery .carousel-button.prev {
+        left: 32px;
+    }
+
+    .large-gallery .carousel-button.next {
+        right: 32px;
+    }
+
+    .space-gallery-container {
+        width: 100%;
+    }
+
+    .large-gallery .carousel-container {
+        height: 450px;
+    }
+
+    .large-gallery .carousel-button {
+        width: 48px;
+        height: 48px;
+    }
+
+    .large-gallery .carousel-button.prev {
+        left: 20px;
+    }
+
+    .large-gallery .carousel-button.next {
+        right: 20px;
+    }
+
+    .space-details-container {
+        margin: 0;
+        padding: 20px;
+    }
+
+    .space-details-header {
+        padding: 0 20px;
+        height: 80px;
+        margin-bottom: 24px;
+    }
+
+    .space-details-header h1 {
+        font-size: 22px;
+    }
+
+    .space-actions {
+        right: 20px;
+        top: 55%;
+        transform: translateY(-50%);
+    }
+
+    .edit-button, .delete-button {
+        height: 40px;
+        padding: 0 16px;
+        font-size: 14px;
+    }
+
+    .details-grid {
+        grid-template-columns: 1fr;
+        padding: 16px;
+    }
+
+    .detail-item {
+        padding: 16px;
+    }
+}
+
+.contracts-section {
+    margin-top: 40px;
+}
+
+.section-header {
+    background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px #0001;
+    padding: 0 40px;
+    height: 90px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    position: relative;
+    border: 1px solid #e2e8f0cc;
+}
+
+.section-header h2 {
+    font-size: 26px;
+    color: #1a202c;
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    text-align: left;
+}
+
+.section-header .add-contract-button {
+    position: absolute;
+    right: 40px;
+    top: 55%;
+    transform: translateY(-55%);
+}
+
+.add-contract-button {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all .3s;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px #2563eb1a;
+    font-size: 16px;
+}
+
+.add-contract-button:hover {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px #2563eb33;
+}
+
+.add-contract-button svg {
+    width: 20px;
+    height: 20px;
+}
+
+.no-contracts-message {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1.6;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin: 20px 0;
+}
+
+.no-contracts-message p:first-child {
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 8px;
+}
+
+.no-contracts-message p:last-child {
+    font-size: 14px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+.contract-card {
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    border: 1px solid #e2e8f0cc;
+    box-shadow: 0 2px 8px #0001;
+    transition: box-shadow .3s;
+}
+
+.contract-card:hover {
+    box-shadow: 0 4px 12px #0002;
+}
+
+.contract-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    justify-content: space-between;
+}
+
+.contract-header h3 {
+    font-size: 20px;
+    color: #1e293b;
+    margin: 0;
+    font-weight: 600;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    box-shadow: 0 1px 2px #0001;
+}
+
+.status-badge.active {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #15803d;
+}
+
+.status-badge.available {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    color: #475569;
+}
+
+.status-badge.expired {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #dc2626;
+}
+
+.status-badge.pending {
+    background: #e5e7eb;
+    color: #555;
+    border: 1px solid #d1d5db;
+}
+
+.contract-details {
+    margin-top: 12px;
+    padding-right: 160px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.contract-details p {
+    margin: 0;
+    padding: 12px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.contract-details p strong {
+    display: block;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.contract-details p span {
+    display: block;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.contract-details p:last-child {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    border-color: #86efac;
+    min-width: 100%;
+}
+
+.contract-details p:last-child strong {
+    color: #15803d;
+}
+
+.contract-details p:last-child span {
+    color: #059669;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.contract-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    justify-content: flex-end;
+    position: static;
+    transform: none;
+}
+
+.edit-contract-button, .delete-contract-button {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: background .2s;
+}
+
+.edit-contract-button {
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    color: #0369a1;
+}
+
+.edit-contract-button:hover {
+    background: linear-gradient(135deg, #bae6fd 0%, #7dd3fc 100%);
+}
+
+.delete-contract-button {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #dc2626;
+}
+
+.delete-contract-button:hover {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+}
+
+.bottom-actions {
+    margin-top: 40px;
+    padding: 20px 0;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid #e2e8f0;
+}
+
+@media (max-width: 768px) {
+    .contract-details {
+        padding-right: 0;
+        margin-top: 16px;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .contract-details p:nth-child(2), .contract-details p:nth-child(3) {
+        grid-column: 1;
+    }
+
+    .add-contract-button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .section-header {
+        padding: 0 20px;
+        height: 80px;
+        margin-bottom: 24px;
+    }
+
+    .section-header h2 {
+        font-size: 22px;
+    }
+
+    .section-header .add-contract-button {
+        right: 20px;
+        padding: 8px 16px;
+        font-size: 14px;
+        transform: translateY(-40%);
+    }
+
+    .contract-header h3 {
+        font-size: 20px;
+    }
+}
+
+.back-button-soft {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: #64748b;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all .3s;
+    box-shadow: 0 2px 4px #0001;
+}
+
+.back-button-soft:hover {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    color: #475569;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px #0002;
+}
+
+.back-button-soft svg {
+    width: 20px;
+    height: 20px;
+    transition: transform .3s;
+}
+
+.back-button-soft:hover svg {
+    transform: translateX(-4px);
+}

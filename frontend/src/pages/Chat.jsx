@@ -7,7 +7,10 @@ const Chat = () => {
     const [newMessage, setNewMessage] = useState('');
 
     useEffect(() => {
-        // Listen for incoming messages
+        // join to the chat in teh mounting
+        socket.emit('joinChat', { conversationId: '681943e618aa0602fd60e0b1' });
+
+        // ear messages on
         socket.on('receiveMessage', (message) => {
             setMessages((prevMessages) => [...prevMessages, message]);
         });

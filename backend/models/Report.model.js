@@ -5,9 +5,10 @@ const mongoose = require('mongoose');
  */
 const ReportSchema = new mongoose.Schema({
     spaceId: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Space',
         required: true
-        // ID of the space where the issue occurs
+        // Reference to the space where the issue occurs
     },
     tenantDni: {
         type: String,

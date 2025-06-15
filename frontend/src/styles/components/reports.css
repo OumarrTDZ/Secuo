@@ -1,0 +1,197 @@
+.reports-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.reports-container h1 {
+    margin-bottom: 2rem;
+    color: #333;
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.report-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.report-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.report-priority {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.priority-high {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
+.priority-medium {
+    background-color: #fef3c7;
+    color: #d97706;
+}
+
+.priority-low {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.report-type {
+    font-weight: 600;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+}
+
+.report-description {
+    color: #6b7280;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.report-date {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+}
+
+.report-images {
+    margin-top: 1rem;
+}
+
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.images-grid img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.images-grid img:hover {
+    transform: scale(1.05);
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+}
+
+.error {
+    text-align: center;
+    padding: 2rem;
+    color: #dc2626;
+}
+
+.no-reports {
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    background: #f9fafb;
+    border-radius: 8px;
+}
+
+/* Status Buttons */
+.report-status-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.status-button {
+    flex: 1;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 140px;
+    border: none;
+}
+
+/* Pending Status */
+.status-button[data-status="PENDING"] {
+    background-color: #FFE0B2 !important;
+    color: #E65100 !important;
+    border: 2px solid #E65100 !important;
+}
+
+.status-button[data-status="PENDING"]:hover {
+    background-color: #FFB74D !important;
+}
+
+.status-button[data-status="PENDING"].active {
+    background-color: #E65100 !important;
+    color: white !important;
+}
+
+/* In Progress Status */
+.status-button[data-status="IN_PROGRESS"] {
+    background-color: #BBDEFB !important;
+    color: #0D47A1 !important;
+    border: 2px solid #0D47A1 !important;
+}
+
+.status-button[data-status="IN_PROGRESS"]:hover {
+    background-color: #64B5F6 !important;
+}
+
+.status-button[data-status="IN_PROGRESS"].active {
+    background-color: #0D47A1 !important;
+    color: white !important;
+}
+
+/* Resolved Status */
+.status-button[data-status="RESOLVED"] {
+    background-color: #C8E6C9 !important;
+    color: #1B5E20 !important;
+    border: 2px solid #1B5E20 !important;
+}
+
+.status-button[data-status="RESOLVED"]:hover {
+    background-color: #81C784 !important;
+}
+
+.status-button[data-status="RESOLVED"].active {
+    background-color: #1B5E20 !important;
+    color: white !important;
+}
+
+/* Active Status Additional Styles */
+.status-button.active {
+    font-weight: 700 !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Disabled State */
+.status-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+} 

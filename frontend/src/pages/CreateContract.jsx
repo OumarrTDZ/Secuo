@@ -84,7 +84,7 @@ const CreateContract = () => {
             }
 
             setMessage("✅ Contract created successfully!");
-            setTimeout(() => navigate('/dashboard-owner'), 1500);
+            setTimeout(() => navigate(`/space/${spaceId}`), 1500);
         } catch (error) {
             console.error('Error details:', {
                 response: error.response?.data,
@@ -92,7 +92,7 @@ const CreateContract = () => {
                 data: error.response?.data?.error
             });
 
-            // Mostrar mensaje específico según el error
+            // Display specific message depending on the error
             if (error.response?.status === 403) {
                 setMessage("You are not authorized to create contracts for this space.");
             } else if (error.response?.status === 404) {

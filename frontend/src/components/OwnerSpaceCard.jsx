@@ -1,18 +1,37 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import ImageCarousel from "./ImageCarousel";
 import "../styles/components/ownerSpaceCard.css";
 import "../styles/components/imageCarousel.css";
-import { FiEye, FiEdit2, FiHome, FiSquare, FiMapPin, FiFileText } from 'react-icons/fi';
+import { FiEye, FiEdit2, FiHome, FiSquare, FiMapPin, FiFileText, FiMap, FiTrash2, FiTag } from 'react-icons/fi';
 
-const OwnerSpaceCard = ({ space }) => {
+const OwnerSpaceCard = ({ space, onDelete }) => {
     const navigate = useNavigate();
     
-    // Debug log to check space object
-    console.log('Space data for contracts:', {
+    // Detailed debug log to check all space data
+    console.log('Space data:', {
         id: space._id,
+        type: space.spaceType,
+        location: {
+            municipality: space.municipality,
+            city: space.city,
+            address: space.address,
+            postalCode: space.postalCode
+        },
+        details: {
+            squareMeters: space.squareMeters,
+            rooms: space.rooms,
+            floor: space.floor,
+            door: space.door,
+            marking: space.marking
+        },
+        status: space.status,
+        validation: space.validationStatus,
+        earnings: space.monthlyEarnings,
         contracts: space.contracts,
-        contractsLength: space.contracts?.length
+        description: space.description,
+        gallery: space.gallery
     });
 
     const getStatusClass = (status) => {
@@ -31,7 +50,27 @@ const OwnerSpaceCard = ({ space }) => {
         navigate(`/edit-space/${spaceId}`);
     };
 
-    // Log para depuración
+    const handleDeleteSpace = async () => {
+        if (!window.confirm('¿Estás seguro de que quieres eliminar este espacio? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('userToken');
+            await axios.delete(`http://localhost:5000/api/spaces/${space._id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            
+            if (onDelete) {
+                onDelete(space._id);
+            }
+        } catch (error) {
+            console.error('Error deleting space:', error);
+            alert(error.response?.data?.error || 'Error al eliminar el espacio');
+        }
+    };
+
+    // debug logggs
     console.log('Space data:', {
         id: space._id,
         gallery: space.gallery,
@@ -56,6 +95,13 @@ const OwnerSpaceCard = ({ space }) => {
                 >
                     <FiEdit2 />
                 </button>
+                <button 
+                    className="delete-space-btn"
+                    onClick={handleDeleteSpace}
+                    aria-label="Delete space"
+                >
+                    <FiTrash2 />
+                </button>
             </div>
 
             {/* Image Carousel */}
@@ -75,7 +121,7 @@ const OwnerSpaceCard = ({ space }) => {
                     </div>
                     {space.marking && (
                         <div className="space-name">
-                            <FiMapPin className="icon" />
+                            <FiTag className="icon" />
                             <span>{space.marking}</span>
                         </div>
                     )}
@@ -89,38 +135,38 @@ const OwnerSpaceCard = ({ space }) => {
                         </div>
                     )}
                     <div className="space-price">
-                        <span className="price-value">€{space.monthlyPrice}</span>
-                        <span className="price-label">/month</span>
-                    </div>
-                </div>
-
-                <div className="space-status">
-                    <div className="status-item">
-                        <span className="status-label">Status</span>
-                        <span className={`status-value ${space.status.toLowerCase()}`}>
-                            {space.status}
-                        </span>
-                    </div>
-                    <div className="status-item">
-                        <span className="status-label">Validation</span>
-                        <span className={`validation-status ${space.validationStatus.toLowerCase()}`}>
-                            {space.validationStatus}
-                        </span>
+                        <span className="price-value">€{space.monthlyEarnings}</span>
+                        <span className="price-label">/month earnings</span>
                     </div>
                 </div>
 
                 <div className="space-meta">
-                    <div className="contracts-info">
-                        <div className="meta-label">
-                            <FiFileText className="icon" /> Contracts History
-                        </div>
-                        <span className="meta-value contracts-count">
-                            {space.contracts || 0} contract{space.contracts !== 1 ? 's' : ''}
-                        </span>
+                    <div className="meta-item">
+                        <FiMap className="icon" />
+                        <span>Municipality</span>
+                        <span className="item-value">{space.municipality}, {space.city}</span>
                     </div>
-                    <div className="space-id">
-                        <span className="meta-label">Reference ID</span>
-                        <span className="meta-value id">{space._id}</span>
+                    <div className="meta-item">
+                        <FiMapPin className="icon" />
+                        <span>Address</span>
+                        <span className="item-value">{space.address}</span>
+                    </div>
+                    <div className="meta-item">
+                        <span>Status</span>
+                        <span className={`item-value status-${space.status.toLowerCase()}`}>{space.status}</span>
+                    </div>
+                    <div className="meta-item">
+                        <span>Validation</span>
+                        <span className={`item-value validation-${space.validationStatus.toLowerCase()}`}>{space.validationStatus}</span>
+                    </div>
+                    <div className="meta-item">
+                        <FiFileText className="icon" />
+                        <span>Contracts History</span>
+                        <span className="item-value">{space.contracts || 0} contract{space.contracts !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div className="meta-item">
+                        <span>Reference ID</span>
+                        <span className="item-value id">{space._id}</span>
                     </div>
                 </div>
             </div>

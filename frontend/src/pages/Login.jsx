@@ -20,18 +20,23 @@ const Login = () => {
         try {
             const { data } = await axios.post('http://localhost:5000/api/users/login', { dni, password });
 
-            // Store user data and token
-            localStorage.setItem('userToken', data.token);
-            localStorage.setItem('userPreference', data.user.preference);
-            
-            // Update contexts
+            const { token, user } = data;
+
+            // sstore in the localStorage
+            localStorage.setItem('userToken', token);
+            localStorage.setItem('preference', user.preference);
+            localStorage.setItem('role', user.role);
+            localStorage.setItem('dni', user.dni);
+
+            // upload the context
+            setPreference(user.preference);
             login(data);
 
-            // Trigger a storage event for other components to update
+            // launch the event to sync changes
             window.dispatchEvent(new Event('storage'));
 
-            // Navigate to the appropriate dashboard
-            if (data.user.preference === "TENANT") {
+            // redirect to the assigned dashboard
+            if (user.preference === "TENANT") {
                 navigate('/dashboard-tenant');
             } else {
                 navigate('/dashboard-owner');

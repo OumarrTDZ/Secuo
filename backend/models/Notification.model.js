@@ -9,7 +9,14 @@ const NotificationSchema = new mongoose.Schema({
     type: {
         type: String,
         required: true,
-        enum: ['SPACE_APPROVED', 'SPACE_REJECTED', 'CONTRACT_APPROVED', 'CONTRACT_REJECTED', 'NEW_MESSAGE', 'PAYMENT_RECEIVED', 'PAYMENT_DUE', 'USER_APPROVED', 'USER_REJECTED'],
+        enum: [
+            'SPACE_APPROVED', 'SPACE_REJECTED',
+            'CONTRACT_APPROVED', 'CONTRACT_REJECTED',
+            'CONTRACT_ACTIVE', 'CONTRACT_EXPIRED', 'CONTRACT_TERMINATED', 'CONTRACT_DELETED', 'CONTRACT_CREATED',
+            'CONTRACT_PAYMENT_UPDATED', 'CONTRACT_DATE_UPDATED', 'CONTRACT_UPDATED',
+            'NEW_MESSAGE', 'PAYMENT_RECEIVED', 'PAYMENT_DUE',
+            'USER_APPROVED', 'USER_REJECTED', 'NEW_REPORT', 'REPORT_STATUS_UPDATED'
+        ],
     },
     title: {
         type: String,

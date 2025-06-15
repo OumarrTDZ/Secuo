@@ -4,7 +4,18 @@ import ImageCarousel from './ImageCarousel';
 import DocumentCarousel from './DocumentCarousel';
 
 const ReviewSidebar = ({ isOpen, onClose, data, type, onValidate }) => {
-    if (!isOpen || !data) return null;
+    if (!data) return null;
+
+    // Handle validation and close
+    const handleValidateAndClose = async (status) => {
+        try {
+            await onValidate(type, data._id, status);
+            onClose();
+        } catch (error) {
+            // If validation fails, don't close the sidebar
+            console.error('Validation failed:', error);
+        }
+    };
 
     const renderUserDetails = (user) => (
         <div className="review-content">
@@ -20,11 +31,11 @@ const ReviewSidebar = ({ isOpen, onClose, data, type, onValidate }) => {
             
             <div className="review-section">
                 <h4>Documents</h4>
-                {user.dniFrontPhoto && user.dniBackPhoto && (
+                {user.idFrontPhoto && user.idBackPhoto && (
                     <div className="document-section">
                         <h5>DNI Documents</h5>
                         <DocumentCarousel
-                            documents={[user.dniFrontPhoto, user.dniBackPhoto]}
+                            documents={[user.idFrontPhoto, user.idBackPhoto]}
                             type="user"
                             id={user._id}
                         />
@@ -45,12 +56,6 @@ const ReviewSidebar = ({ isOpen, onClose, data, type, onValidate }) => {
                 {space.rooms && <p><strong>Rooms:</strong> {space.rooms}</p>}
                 {space.floor && <p><strong>Floor:</strong> {space.floor}</p>}
                 {space.door && <p><strong>Door:</strong> {space.door}</p>}
-            </div>
-
-            <div className="review-section">
-                <h4>Pricing</h4>
-                <p><strong>Monthly Price:</strong> €{space.monthlyPrice}</p>
-                {space.salePrice && <p><strong>Sale Price:</strong> €{space.salePrice}</p>}
             </div>
 
             <div className="review-section">
@@ -78,74 +83,87 @@ const ReviewSidebar = ({ isOpen, onClose, data, type, onValidate }) => {
         </div>
     );
 
-    const renderContractDetails = (contract) => (
-        <div className="review-content">
-            <h3>Contract Details</h3>
-            <div className="review-section">
-                <h4>Contract Information</h4>
-                <p><strong>Type:</strong> {contract.contractType}</p>
-                <p><strong>Owner DNI:</strong> {contract.ownerDni}</p>
-                <p><strong>Tenant DNI:</strong> {contract.tenantDni}</p>
-                <p><strong>Start Date:</strong> {new Date(contract.startDate).toLocaleDateString()}</p>
-                {contract.endDate && (
-                    <p><strong>End Date:</strong> {new Date(contract.endDate).toLocaleDateString()}</p>
-                )}
-            </div>
+    const renderContractDetails = (contract) => {
+        // Process contract documents to ensure we have proper paths
+        const processedDocuments = contract.contractDocument?.map(doc => {
+            if (typeof doc === 'string') {
+                return doc;
+            }
+            return doc.path || doc;
+        }).filter(Boolean) || [];
 
-            <div className="review-section">
-                <h4>Financial Details</h4>
-                <p><strong>Initial Payment:</strong> €{contract.initialPayment}</p>
-                {contract.monthlyPayment && (
-                    <p><strong>Monthly Payment:</strong> €{contract.monthlyPayment}</p>
-                )}
-                {contract.lateFee > 0 && (
-                    <p><strong>Late Fee:</strong> €{contract.lateFee}</p>
-                )}
-                <p><strong>Payment Status:</strong> {contract.paymentStatus}</p>
-            </div>
-
-            {contract.contractDocument && contract.contractDocument.length > 0 && (
+        return (
+            <div className="review-content">
+                <h3>Contract Details</h3>
                 <div className="review-section">
-                    <h4>Contract Documents</h4>
-                    <DocumentCarousel
-                        documents={contract.contractDocument}
-                        type="contract"
-                        id={contract._id}
-                    />
+                    <h4>Contract Information</h4>
+                    <p><strong>Type:</strong> {contract.contractType}</p>
+                    <p><strong>Owner DNI:</strong> {contract.ownerDni}</p>
+                    <p><strong>Tenant DNI:</strong> {contract.tenantDni}</p>
+                    <p><strong>Start Date:</strong> {new Date(contract.startDate).toLocaleDateString()}</p>
+                    {contract.endDate && (
+                        <p><strong>End Date:</strong> {new Date(contract.endDate).toLocaleDateString()}</p>
+                    )}
                 </div>
-            )}
-        </div>
-    );
+
+                <div className="review-section">
+                    <h4>Financial Details</h4>
+                    <p><strong>Initial Payment:</strong> €{contract.initialPayment}</p>
+                    {contract.monthlyPayment && (
+                        <p><strong>Monthly Payment:</strong> €{contract.monthlyPayment}</p>
+                    )}
+                    {contract.lateFee > 0 && (
+                        <p><strong>Late Fee:</strong> €{contract.lateFee}</p>
+                    )}
+                    <p><strong>Payment Status:</strong> {contract.paymentStatus}</p>
+                </div>
+
+                {processedDocuments.length > 0 && (
+                    <div className="review-section">
+                        <h4>Contract Documents</h4>
+                        <DocumentCarousel
+                            documents={processedDocuments}
+                            type="contract"
+                            id={contract._id}
+                        />
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
-        <div className={`review-sidebar ${isOpen ? 'open' : ''}`}>
-            <button className="close-button" onClick={onClose}>×</button>
-            {type === 'user' && renderUserDetails(data)}
-            {type === 'space' && renderSpaceDetails(data)}
-            {type === 'contract' && renderContractDetails(data)}
-            
-            <div className="sidebar-actions">
-                <button 
-                    className="approve-button"
-                    onClick={() => onValidate(type, data._id, "APPROVED")}
-                >
-                    Approve
-                </button>
-                <button 
-                    className="reject-button"
-                    onClick={() => onValidate(type, data._id, "REJECTED")}
-                >
-                    Reject
-                </button>
-                <button 
-                    className="cancel-button"
-                    onClick={onClose}
-                >
-                    Cancel
-                </button>
+        <>
+            <div className={`review-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}></div>
+            <div className={`review-sidebar ${isOpen ? 'open' : ''}`}>
+                <button className="close-button" onClick={onClose}>×</button>
+                {type === 'user' && renderUserDetails(data)}
+                {type === 'space' && renderSpaceDetails(data)}
+                {type === 'contract' && renderContractDetails(data)}
+                
+                <div className="sidebar-actions">
+                    <button 
+                        className="approve-button"
+                        onClick={() => handleValidateAndClose("APPROVED")}
+                    >
+                        Approve
+                    </button>
+                    <button 
+                        className="reject-button"
+                        onClick={() => handleValidateAndClose("REJECTED")}
+                    >
+                        Reject
+                    </button>
+                    <button 
+                        className="cancel-button"
+                        onClick={onClose}
+                    >
+                        Cancel
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 
-export default ReviewSidebar; 
+export default ReviewSidebar;

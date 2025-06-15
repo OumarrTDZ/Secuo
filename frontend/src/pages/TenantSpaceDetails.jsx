@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import '../styles/styles.css';
+import '../styles/spaceDetails.css';
 import ImageCarousel from "../components/ImageCarousel";
 import { FiAlertTriangle } from 'react-icons/fi';
 
@@ -104,102 +104,119 @@ const TenantSpaceDetails = () => {
     }
 
     return (
-        <div className="container">
-            <div className="space-details">
-                <div className="space-header">
-                    <h2>{space.spaceType} Details</h2>
+        <div className="space-details-container">
+            <div className="space-details-header">
+                <h1>{space.spaceType} Details</h1>
+                <div className="space-actions">
                     <button 
                         onClick={handleReport}
-                        className="report-button"
+                        className="edit-button"
                         title="Report an issue"
                     >
                         <FiAlertTriangle /> Report Issue
                     </button>
                 </div>
-                
+            </div>
+
+            <div className="space-details-content">
                 {/* Image Gallery */}
                 {space.gallery && space.gallery.length > 0 && (
-                    <div className="space-gallery">
-                        <ImageCarousel images={space.gallery} spaceId={space._id} />
+                    <div className="space-gallery-container">
+                        <div className="space-gallery large-gallery">
+                            <ImageCarousel images={space.gallery} spaceId={space._id} />
+                        </div>
                     </div>
                 )}
 
                 <div className="details-grid">
                     <div className="detail-item">
-                        <strong>Type:</strong> {space.spaceType}
+                        <span className="detail-label">Type:</span>
+                        <span className="detail-value">{space.spaceType}</span>
                     </div>
                     {space.marking && (
                         <div className="detail-item">
-                            <strong>Name:</strong> {space.marking}
+                            <span className="detail-label">Name:</span>
+                            <span className="detail-value">{space.marking}</span>
                         </div>
                     )}
                     {space.floor && (
                         <div className="detail-item">
-                            <strong>Floor:</strong> {space.floor}
+                            <span className="detail-label">Floor:</span>
+                            <span className="detail-value">{space.floor}</span>
                         </div>
                     )}
                     {space.door && (
                         <div className="detail-item">
-                            <strong>Door:</strong> {space.door}
+                            <span className="detail-label">Door:</span>
+                            <span className="detail-value">{space.door}</span>
                         </div>
                     )}
                     <div className="detail-item">
-                        <strong>Size:</strong> {space.squareMeters}m²
+                        <span className="detail-label">Size:</span>
+                        <span className="detail-value">{space.squareMeters}m²</span>
                     </div>
                     {space.rooms && (
                         <div className="detail-item">
-                            <strong>Rooms:</strong> {space.rooms}
+                            <span className="detail-label">Rooms:</span>
+                            <span className="detail-value">{space.rooms}</span>
                         </div>
                     )}
                     <div className="detail-item">
-                        <strong>Monthly Price:</strong> €{space.monthlyPrice}
+                        <span className="detail-label">Municipality:</span>
+                        <span className="detail-value">{space.municipality}</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">City:</span>
+                        <span className="detail-value">{space.city}</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Address:</span>
+                        <span className="detail-value">{space.address}</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Postal Code:</span>
+                        <span className="detail-value">{space.postalCode}</span>
                     </div>
                     {space.description && (
                         <div className="detail-item full-width">
-                            <strong>Description:</strong>
-                            <p>{space.description}</p>
+                            <span className="detail-label">Description:</span>
+                            <p className="detail-value description">{space.description}</p>
                         </div>
                     )}
                 </div>
             </div>
 
             {contract && (
-                <div className="contract-section">
-                    <h2>Your Contract Details</h2>
-                    <div className="contract-details">
-                        <div className="detail-item">
-                            <strong>Contract Type:</strong> {contract.contractType}
-                        </div>
-                        <div className="detail-item">
-                            <strong>Start Date:</strong> {new Date(contract.startDate).toLocaleDateString()}
-                        </div>
-                        <div className="detail-item">
-                            <strong>End Date:</strong> {new Date(contract.endDate).toLocaleDateString()}
-                        </div>
-                        <div className="detail-item">
-                            <strong>Monthly Payment:</strong> €{contract.monthlyPayment}
-                        </div>
-                        <div className="detail-item">
-                            <strong>Payment Status:</strong> 
-                            <span className={`status ${contract.paymentStatus.toLowerCase()}`}>
-                                {contract.paymentStatus}
-                            </span>
-                        </div>
-                        <div className="detail-item">
-                            <strong>Contract Status:</strong> 
-                            <span className={`status ${contract.contractStatus.toLowerCase()}`}>
-                                {contract.contractStatus}
-                            </span>
+                <div className="contracts-section">
+                    <div className="section-header">
+                        <h2>Your Contract Details</h2>
+                    </div>
+                    <div className="contracts-grid">
+                        <div className="contract-card">
+                            <div className="contract-header">
+                                <h3>{contract.contractType}</h3>
+                                <span className={`status-badge ${contract.contractStatus.toLowerCase()}`}>
+                                    {contract.contractStatus}
+                                </span>
+                            </div>
+                            <div className="contract-details">
+                                <p><strong>Start Date:</strong> {new Date(contract.startDate).toLocaleDateString()}</p>
+                                <p><strong>End Date:</strong> {new Date(contract.endDate).toLocaleDateString()}</p>
+                                <p><strong>Monthly Payment:</strong> €{contract.monthlyPayment}</p>
+                                <p><strong>Payment Status:</strong> <span className={`status-badge ${contract.paymentStatus.toLowerCase()}`}>{contract.paymentStatus}</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
             )}
 
-            <button onClick={handleGoBack} className="back-button">
-                Go Back
-            </button>
+            <div className="bottom-actions">
+                <button onClick={handleGoBack} className="back-button-soft">
+                    Back
+                </button>
+            </div>
         </div>
     );
 };
 
-export default TenantSpaceDetails; 
+export default TenantSpaceDetails;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import '../styles/styles.css';
+import '../styles/spaceDetails.css';
 import ImageCarousel from "../components/ImageCarousel";
 import { FiPlus, FiEdit2, FiTrash2, FiArrowLeft } from 'react-icons/fi';
 
@@ -11,10 +11,77 @@ const SpaceDetails = () => {
     const [contracts, setContracts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [tenantNames, setTenantNames] = useState({});
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchSpaceDetails = async () => {
+            try {
+                const token = localStorage.getItem('userToken');
+                const { data } = await axios.get(`http://localhost:5000/api/spaces/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setSpace(data.space);
+
+                // Fetch tenant names for each contract
+                const contractsData = data.contracts;
+                const tenantPromises = contractsData.map(async (contract) => {
+                    try {
+                        const userResponse = await axios.get(`http://localhost:5000/api/users/profile/${contract.tenantDni}`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+                        return {
+                            dni: contract.tenantDni,
+                            name: `${userResponse.data.firstName} ${userResponse.data.lastName}`
+                        };
+                    } catch (err) {
+                        console.log(`Tenant ${contract.tenantDni} not found in system`);
+                        return {
+                            dni: contract.tenantDni,
+                            name: `Tenant (${contract.tenantDni})`
+                        };
+                    }
+                });
+
+                const tenants = await Promise.all(tenantPromises);
+                const tenantNamesMap = tenants.reduce((acc, tenant) => {
+                    acc[tenant.dni] = tenant.name;
+                    return acc;
+                }, {});
+
+                setTenantNames(tenantNamesMap);
+                setContracts(contractsData);
+                setError(null);
+            } catch (error) {
+                console.error("Error fetching space details:", error);
+                setError(error.response?.data?.error || "Error loading space details");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchSpaceDetails();
+    }, [id]);
 
     const handleGoToDashboard = () => {
         navigate('/dashboard-owner');
+    };
+
+    const handleDeleteSpace = async () => {
+        if (!window.confirm('¿Estás seguro de que quieres eliminar este espacio? Esta acción no se puede deshacer.')) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('userToken');
+            await axios.delete(`http://localhost:5000/api/spaces/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            navigate('/dashboard-owner');
+        } catch (error) {
+            console.error("Error deleting space:", error);
+            alert(error.response?.data?.error || "Error deleting space");
+        }
     };
 
     const handleDeleteContract = async (contractId) => {
@@ -28,7 +95,6 @@ const SpaceDetails = () => {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Update the contracts list after deletion
             setContracts(contracts.filter(contract => contract._id !== contractId));
         } catch (error) {
             console.error("Error deleting contract:", error);
@@ -36,52 +102,8 @@ const SpaceDetails = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchSpaceDetails = async () => {
-            try {
-                console.log('1. Iniciando fetchSpaceDetails...');
-                setLoading(true);
-                setError(null);
-                console.log('2. Haciendo petición a la API para id:', id);
-                const { data } = await axios.get(`http://localhost:5000/api/spaces/${id}`);
-                
-                console.log('3. Respuesta recibida:', data);
-                
-                if (!data.space) {
-                    console.log('4. No se encontró el espacio en la respuesta');
-                    throw new Error('Space not found');
-                }
-                
-                console.log('5. Guardando datos del espacio:', data.space);
-                setSpace(data.space);
-                console.log('6. Guardando contratos:', data.contracts);
-                setContracts(data.contracts || []);
-            } catch (error) {
-                console.error('7. Error en fetchSpaceDetails:', error);
-                console.log('8. Detalles del error:', {
-                    message: error.message,
-                    response: error.response?.data,
-                    status: error.response?.status
-                });
-                setError(error?.response?.data?.error || "Error loading space details");
-            } finally {
-                console.log('9. Finalizando fetchSpaceDetails');
-                setLoading(false);
-            }
-        };
-
-        console.log('0. SpaceDetails montado, id:', id);
-        if (id) {
-            fetchSpaceDetails();
-        }
-    }, [id]);
-
     if (loading) {
-        return (
-            <div className="loading-container">
-                <p>Loading space details...</p>
-            </div>
-        );
+        return <div className="loading">Loading...</div>;
     }
 
     if (error) {
@@ -110,13 +132,23 @@ const SpaceDetails = () => {
         <div className="space-details-container">
             <div className="space-details-header">
                 <h1>{space.spaceType} Details</h1>
+                <div className="space-actions">
+                    <Link to={`/edit-space/${space._id}`} className="edit-button">
+                        <FiEdit2 /> Edit Space
+                    </Link>
+                    <button onClick={handleDeleteSpace} className="delete-button">
+                        <FiTrash2 /> Delete Space
+                    </button>
+                </div>
             </div>
 
             <div className="space-details-content">
                 {/* Image Gallery */}
                 {space.gallery && space.gallery.length > 0 && (
-                    <div className="space-gallery">
-                        <ImageCarousel images={space.gallery} spaceId={space._id} />
+                    <div className="space-gallery-container">
+                        <div className="space-gallery large-gallery">
+                            <ImageCarousel images={space.gallery} spaceId={space._id} />
+                        </div>
                     </div>
                 )}
 
@@ -158,8 +190,24 @@ const SpaceDetails = () => {
                         <span className="detail-value status-badge">{space.status}</span>
                     </div>
                     <div className="detail-item">
-                        <span className="detail-label">Monthly Price:</span>
-                        <span className="detail-value price">€{space.monthlyPrice}</span>
+                        <span className="detail-label">Monthly Earnings:</span>
+                        <span className="detail-value price">€{space.monthlyEarnings}</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Municipality:</span>
+                        <span className="detail-value">{space.municipality}</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">City:</span>
+                        <span className="detail-value">{space.city}</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Address:</span>
+                        <span className="detail-value">{space.address}</span>
+                    </div>
+                    <div className="detail-item">
+                        <span className="detail-label">Postal Code:</span>
+                        <span className="detail-value">{space.postalCode}</span>
                     </div>
                     {space.description && (
                         <div className="detail-item full-width">
@@ -179,7 +227,7 @@ const SpaceDetails = () => {
                 </div>
 
                 {contracts.length === 0 ? (
-                    <div className="no-contracts">
+                    <div className="no-contracts-message">
                         <p>No contracts for this space yet.</p>
                         <p>Click the button above to create a new contract.</p>
                     </div>
@@ -194,22 +242,11 @@ const SpaceDetails = () => {
                                     </span>
                                 </div>
                                 <div className="contract-details">
-                                    <div className="contract-info">
-                                        <span className="info-label">Tenant:</span>
-                                        <span className="info-value">{contract.tenantDni}</span>
-                                    </div>
-                                    <div className="contract-info">
-                                        <span className="info-label">Start:</span>
-                                        <span className="info-value">{new Date(contract.startDate).toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="contract-info">
-                                        <span className="info-label">End:</span>
-                                        <span className="info-value">{new Date(contract.endDate).toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="contract-info">
-                                        <span className="info-label">Monthly Payment:</span>
-                                        <span className="info-value price">€{contract.monthlyPayment}</span>
-                                    </div>
+                                    <p><strong>Tenant Name:</strong> {contract.tenantName}</p>
+                                    <p><strong>Tenant DNI:</strong> {contract.tenantDni}</p>
+                                    <p><strong>Start Date:</strong> {new Date(contract.startDate).toLocaleDateString()}</p>
+                                    <p><strong>End Date:</strong> {new Date(contract.endDate).toLocaleDateString()}</p>
+                                    <p><strong>Monthly Payment:</strong> €{contract.monthlyPayment}</p>
                                 </div>
                                 <div className="contract-actions">
                                     <Link to={`/edit-contract/${contract._id}`} className="edit-contract-button">

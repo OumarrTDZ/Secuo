@@ -17,9 +17,11 @@ const CreateSpace = () => {
         marking: '',
         description: '',
         status: 'AVAILABLE',
-        monthlyPrice: '',
-        salePrice: '',
         ownerDni: '',
+        municipality: '',
+        city: '',
+        address: '',
+        postalCode: ''
     });
 
     const [gallery, setGallery] = useState([]);
@@ -48,7 +50,7 @@ const CreateSpace = () => {
             return setMessage("Authentication failed. Please log in again.");
         }
 
-        if (!formData.spaceType || !formData.squareMeters || !formData.ownerDni || !formData.monthlyPrice || validationDocument.length === 0) {
+        if (!formData.spaceType || !formData.squareMeters || !formData.ownerDni || validationDocument.length === 0) {
             return setMessage("Please complete all required fields and upload at least one validation document.");
         }
 
@@ -189,12 +191,48 @@ const CreateSpace = () => {
                     </div>
 
                     <div className="form-group">
-                        <label className="required">Monthly Price (€)</label>
+                        <label className="required">Municipality</label>
                         <input 
-                            name="monthlyPrice" 
-                            type="number" 
-                            placeholder="Monthly rental price"
-                            value={formData.monthlyPrice} 
+                            name="municipality" 
+                            type="text" 
+                            placeholder="Enter municipality"
+                            value={formData.municipality} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">City</label>
+                        <input 
+                            name="city" 
+                            type="text" 
+                            placeholder="Enter city"
+                            value={formData.city} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group full-width">
+                        <label className="required">Address</label>
+                        <input 
+                            name="address" 
+                            type="text" 
+                            placeholder="Enter full street address"
+                            value={formData.address} 
+                            onChange={handleChange} 
+                            required 
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label className="required">Postal Code</label>
+                        <input 
+                            name="postalCode" 
+                            type="text" 
+                            placeholder="Enter postal code"
+                            value={formData.postalCode} 
                             onChange={handleChange} 
                             required 
                         />

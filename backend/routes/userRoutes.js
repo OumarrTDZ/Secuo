@@ -12,7 +12,8 @@ const {
     getTenantDashboard,
     getOwnerDashboard,
     deleteProfilePhoto,
-    updateProfilePhoto
+    updateProfilePhoto,
+    updateUserPreference,
 } = require('../controllers/user.controller');
 
 const router = express.Router();
@@ -46,7 +47,13 @@ router.get('/pending', authAdmin, async (req, res) => {
 router.post('/upload-profile/:dni', authUser, upload.single('profilePhoto'), updateProfilePhoto);
 
 // Edit user details
-router.patch('/:id/edit', authUser, updateUser);
+router.patch('/:id/edit', authUser, upload.fields([
+    { name: 'profilePhoto', maxCount: 1 },
+    { name: 'idFrontPhoto', maxCount: 1 },
+    { name: 'idBackPhoto', maxCount: 1 }
+]), updateUser);
+
+router.patch('/preference', authUser, updateUserPreference);
 
 // Validate user (admin only)
 router.patch('/:id/validate', authAdmin, validateUser);

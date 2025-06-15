@@ -8,19 +8,10 @@
     justify-content: center;
 }
 
-.avatar__container--lg {
-    width: 100px;
-    height: 100px;
-}
+.avatar__container--lg { width: 100px; height: 100px; }
+.avatar__container--sm { width: 40px; height: 40px; }
 
-.avatar__container--sm {
-    width: 40px;
-    height: 40px;
-}
-
-.avatar__border {
-    border: 2px solid #ccc;
-}
+.avatar__border { border: 2px solid #ccc; }
 
 .avatar__image {
     width: 100%;

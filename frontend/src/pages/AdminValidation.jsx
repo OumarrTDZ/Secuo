@@ -81,8 +81,16 @@ const AdminValidation = () => {
                 default:
                     break;
             }
+
+            // Show success message
+            const message = status === 'APPROVED' ? 'Item approved successfully' : 'Item rejected successfully';
+            alert(message);
+
         } catch (error) {
             console.error("Error during validation:", error);
+            // Show error message
+            alert('Error during validation. Please try again.');
+            throw error; // Re-throw the error so the sidebar knows the operation failed
         }
     };
 

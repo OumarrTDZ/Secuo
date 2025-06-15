@@ -18,8 +18,11 @@ const EditSpace = () => {
         marking: '',
         description: '',
         status: 'AVAILABLE',
-        monthlyPrice: '',
-        salePrice: '',
+        ownerDni: '',
+        municipality: '',
+        city: '',
+        address: '',
+        postalCode: ''
     });
 
     const [gallery, setGallery] = useState([]);
@@ -54,8 +57,11 @@ const EditSpace = () => {
                     marking: space.marking || '',
                     description: space.description || '',
                     status: space.status || 'AVAILABLE',
-                    monthlyPrice: space.monthlyPrice || '',
-                    salePrice: space.salePrice || '',
+                    ownerDni: space.ownerDni || '',
+                    municipality: space.municipality || '',
+                    city: space.city || '',
+                    address: space.address || '',
+                    postalCode: space.postalCode || ''
                 });
 
                 if (space.gallery) {
@@ -255,18 +261,6 @@ const EditSpace = () => {
                         </select>
                     </div>
 
-                    <div className="form-group">
-                        <label className="required">Monthly Price (€)</label>
-                        <input 
-                            name="monthlyPrice" 
-                            type="number" 
-                            placeholder="Monthly rental price"
-                            value={formData.monthlyPrice} 
-                            onChange={handleChange} 
-                            required 
-                        />
-                    </div>
-
                     {existingGallery.length > 0 && (
                         <div className="form-group full-width">
                             <label>Current Images</label>
@@ -347,4 +341,4 @@ const EditSpace = () => {
     );
 };
 
-export default EditSpace; 
+export default EditSpace;

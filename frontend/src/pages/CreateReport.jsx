@@ -52,7 +52,7 @@ const CreateReport = () => {
             if (images.length > 0) {
                 const imagesData = new FormData();
                 images.forEach(file => {
-                    imagesData.append('images', file);
+                    imagesData.append('attachments', file);
                 });
 
                 await axios.post(
@@ -62,6 +62,7 @@ const CreateReport = () => {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                             Authorization: `Bearer ${token}`,
+                            'x-space-id': spaceId
                         }
                     }
                 );

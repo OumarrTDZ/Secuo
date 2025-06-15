@@ -28,6 +28,7 @@
 }
 
 .sidebar-right {
+    width: var(--right-sidebar-width);
     right: 0;
 }
 
@@ -120,7 +121,7 @@
 .no-spaces-icon {
     width: 48px;
     height: 48px;
-    color: #3b82f6;
+    color: #47ca61;
     margin-bottom: 16px;
 }
 
@@ -141,7 +142,7 @@
     align-items: center;
     gap: 8px;
     padding: 14px 24px;
-    background-color: #3b82f6;
+    background-color: #47ca61;
     color: white;
     border: none;
     border-radius: 12px;
@@ -237,5 +238,11 @@
 
     .add-space-button:hover {
         transform: translateY(-2px);
+    }
+}
+
+@media (max-width: 950px) {
+    .owner-title {
+        display: none;
     }
 }

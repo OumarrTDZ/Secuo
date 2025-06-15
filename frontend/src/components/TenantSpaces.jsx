@@ -6,7 +6,6 @@ import {
     FiEye, 
     FiAlertTriangle, 
     FiHome,
-    FiDollarSign,
     FiLayout
 } from 'react-icons/fi';
 
@@ -21,7 +20,7 @@ const TenantSpaces = ({ user, rentedSpaces = [] }) => {
     const handleReportSpace = (spaceId) => {
         navigate(`/create-report/${spaceId}`);
     };
-
+    console.log(rentedSpaces)
     return (
         <div className="tenant-container">
             <h3 className="tenant-title"><FiHome className="title-icon" /> Rented Spaces</h3>
@@ -61,15 +60,11 @@ const TenantSpaces = ({ user, rentedSpaces = [] }) => {
                             {/* Display main space info */}
                             <p className="tenant-text">
                                 <FiHome className="info-icon" />
-                                <strong>{space.spaceType || 'Unknown Type'}</strong> - {space.description || 'No description available'}
+                                <strong>{space.spaceType || 'Unknown Type'}</strong> - {space.marking || 'No description available'}
                             </p>
                             <p className="tenant-subtext">
                                 <FiLayout className="info-icon" />
-                                Rooms: {space.rooms || "Not Available"}
-                            </p>
-                            <p className="tenant-subtext">
-                                <FiDollarSign className="info-icon" />
-                                Monthly Price: €{space.monthlyPrice || "Not Specified"}
+                                Address: {space.address || "Not Available"}
                             </p>
                         </div>
                     );

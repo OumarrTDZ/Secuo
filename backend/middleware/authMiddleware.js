@@ -11,17 +11,21 @@ const authUser = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Optional: remove this console log in production
-        console.log('Decoded token:', decoded);
-
-        const user = await User.findById(decoded.id).select("-password");
+        const user = await User.findById(decoded.id).select('-password');
 
         if (!user) {
             return res.status(403).json({ error: "Access denied. User not found." });
         }
 
-        req.user = user; // Attach the authenticated user to the request object
+        // Agrega preferencia si no viene en el token
+        const fallbackPreference = user.preference || 'TENANT';
+
+        req.user = {
+            ...decoded,
+            ...user.toObject(),
+            preference: decoded.preference || fallbackPreference
+        };
+
         next();
     } catch (error) {
         console.error("User authentication error:", error);

@@ -1,50 +1,38 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
-// Create the Preference context
 const PreferenceContext = createContext();
 
-// PreferenceProvider component to provide preference state and toggle function
 export const PreferenceProvider = ({ children }) => {
     const navigate = useNavigate();
+    const location = useLocation();
+
     const [preference, setPreference] = useState(() => {
-        // Cargar preferencia inicial del localStorage
-        const stored = localStorage.getItem('userPreference');
-        return (stored === 'TENANT' || stored === 'OWNER') ? stored : 'TENANT';
+        const stored = localStorage.getItem('preference');
+        return stored === 'OWNER' ? 'OWNER' : 'TENANT';
     });
 
-    // Función para cambiar la preferencia
-    const togglePreference = () => {
-        const newPref = preference === 'TENANT' ? 'OWNER' : 'TENANT';
-        setPreference(newPref);
-        localStorage.setItem('userPreference', newPref);
-        
-        // Redirect to the appropriate dashboard
-        navigate(newPref === 'TENANT' ? '/dashboard-tenant' : '/dashboard-owner');
-    };
-
-    // Update preference when userPreference changes in localStorage
     useEffect(() => {
-        const handleStorageChange = (e) => {
-            if (e.key === 'userPreference') {
-                const stored = localStorage.getItem('userPreference');
-                if (stored && (stored === 'TENANT' || stored === 'OWNER')) {
-                    setPreference(stored);
-                }
-            }
+        const syncPreference = () => {
+            const updated = localStorage.getItem('preference');
+            setPreference(updated === 'OWNER' ? 'OWNER' : 'TENANT');
         };
-
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
+        window.addEventListener('storage', syncPreference);
+        return () => window.removeEventListener('storage', syncPreference);
     }, []);
 
-    // Update preference when it changes in localStorage
-    useEffect(() => {
-        const stored = localStorage.getItem('userPreference');
-        if (stored && (stored === 'TENANT' || stored === 'OWNER') && stored !== preference) {
-            setPreference(stored);
+    const togglePreference = () => {
+        const newPref = preference === 'TENANT' ? 'OWNER' : 'TENANT';
+        localStorage.setItem('preference', newPref);
+        setPreference(newPref);
+
+        // Route redirection for full visual context change
+        if (newPref === 'OWNER') {
+            navigate('/dashboard-owner');
+        } else {
+            navigate('/dashboard-tenant');
         }
-    }, [preference]);
+    };
 
     return (
         <PreferenceContext.Provider value={{ preference, setPreference, togglePreference }}>
@@ -53,5 +41,4 @@ export const PreferenceProvider = ({ children }) => {
     );
 };
 
-// Custom hook to use Preference context easily
 export const usePreference = () => useContext(PreferenceContext);
