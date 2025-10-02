@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import api from 'api';
+import api from './api.js';
 import { useNavigate, useParams } from 'react-router-dom';
 import ImageDropZone from '../components/ImageDropZone';
 import '../styles/components/forms.css';

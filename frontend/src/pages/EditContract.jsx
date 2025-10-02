@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from 'api';
+import api from './api.js';
 import ImageDropZone from '../components/ImageDropZone';
 import '../styles/components/forms.css';
 import { FiTrash2, FiDownload } from 'react-icons/fi';

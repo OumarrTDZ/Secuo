@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from 'api';
+import api from './api.js';
 import { FiArrowLeft, FiUserCheck, FiHome, FiFileText, FiCheckSquare } from 'react-icons/fi';
 import ReviewSidebar from '../components/ReviewSidebar';
 

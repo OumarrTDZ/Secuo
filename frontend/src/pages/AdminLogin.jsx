@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from 'api';
+import api from './api.js';
 import "../styles/pages/adminLogin.css";
 import logo from '../assets/logo.png';
 
