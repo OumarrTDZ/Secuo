@@ -13,7 +13,9 @@ const app = express();
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: "https://secuo-rho.vercel.app"
+}));
 app.use(express.json());
 
 // Serve static files from the uploads directory
