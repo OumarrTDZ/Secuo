@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from './api.js';
+import api from "../api";
 import { AuthContext } from '../context/AuthContext';
 import { usePreference } from '../context/PreferenceContext';
 import logo from '../assets/logo.png';

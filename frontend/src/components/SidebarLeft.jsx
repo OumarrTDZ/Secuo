@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import api from './api.js';
+import api from "../api";
 import socket from '../socket/socket';
 import { usePreference } from '../context/PreferenceContext';
 import '../styles/components/sidebarLeft.css';

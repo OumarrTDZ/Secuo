@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import "../styles/components/profilePhotoMenu.css";
-import api from "api";
+import api from "../api";
 
 const ProfilePhotoMenu = ({ user, onUpdate, onClose }) => {
     // State to hold the new selected photo file

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import api from './api.js';
+import api from "../api";
 import ImageDropZone from '../components/ImageDropZone';
 import '../styles/components/forms.css';
 

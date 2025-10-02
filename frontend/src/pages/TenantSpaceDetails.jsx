@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import api from "api";
+import api from "../api";
 import '../styles/spaceDetails.css';
 import ImageCarousel from "../components/ImageCarousel";
 import { FiAlertTriangle } from 'react-icons/fi';

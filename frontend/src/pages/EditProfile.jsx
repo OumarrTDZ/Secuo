@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import api from "api";
+import api from "../api";
 import ReusableDropzone from "../components/ReusableDropzone";
 import "../styles/components/forms.css";
 import { Link, useNavigate } from "react-router-dom";

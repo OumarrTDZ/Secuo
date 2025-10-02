@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "api";
+import api from "../api";
 import OwnerSpaceCard from "../components/OwnerSpaceCard.jsx";
 import "../styles/pages/ownerDashboard.css";
 import { FiPlus, FiHome } from 'react-icons/fi';

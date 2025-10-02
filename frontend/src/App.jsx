@@ -24,7 +24,7 @@ import EditSpace from "./pages/EditSpace.jsx";
 import Navbar from './components/Navbar';
 import SidebarLeft from './components/SidebarLeft';
 import SidebarRight from './components/SidebarRight';
-import api from 'api';
+import api from './api';
 
 // Layout for usual users
 const UserLayout = ({ children }) => {
