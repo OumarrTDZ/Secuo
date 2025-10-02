@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from 'api';
 import "../styles/pages/adminLogin.css";
 import logo from '../assets/logo.png';
 
@@ -18,7 +18,7 @@ const AdminLogin = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:5000/api/admins/login', formData);
+            const response = await api.post('http://localhost:5000/api/admins/login', formData);
             localStorage.setItem('adminToken', response.data.token);
             navigate('/admin-dashboard');
         } catch (error) {

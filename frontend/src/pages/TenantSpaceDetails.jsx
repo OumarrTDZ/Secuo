@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "api";
 import '../styles/spaceDetails.css';
 import ImageCarousel from "../components/ImageCarousel";
 import { FiAlertTriangle } from 'react-icons/fi';
@@ -34,7 +34,7 @@ const TenantSpaceDetails = () => {
                     return;
                 }
                 console.log('Making API request...');
-                const { data } = await axios.get(`http://localhost:5000/api/spaces/${id}`, {
+                const { data } = await api.get(`http://localhost:5000/api/spaces/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from 'api';
 import ImageDropZone from '../components/ImageDropZone';
 import '../styles/components/forms.css';
 import { FiTrash2, FiDownload } from 'react-icons/fi';
@@ -42,7 +42,7 @@ const EditContract = () => {
             try {
                 console.log('Fetching contract with ID:', id);
                 
-                const response = await axios.get(
+                const response = await api.get(
                     `http://localhost:5000/api/contracts/${id}`,
                     { 
                         headers: { 
@@ -157,7 +157,7 @@ const EditContract = () => {
             console.log('Deleting document:', fileName);
             
             // Update contract to remove the document
-            await axios.patch(
+            await api.patch(
                 `http://localhost:5000/api/contracts/${id}`,
                 { documentToDelete: fileName },
                 { 
@@ -195,7 +195,7 @@ const EditContract = () => {
             console.log('Submitting contract update:', formData);
             
             // Update contract details
-            const response = await axios.patch(
+            const response = await api.patch(
                 `http://localhost:5000/api/contracts/${id}`,
                 formData,
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -210,7 +210,7 @@ const EditContract = () => {
                     documentsData.append('contractDocument', file);
                 });
 
-                await axios.post(
+                await api.post(
                     `http://localhost:5000/api/contracts/${id}/upload`,
                     documentsData,
                     {

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from 'api';
 import "../styles/pages/register.css";
 
 const PasswordStrength = ({ password }) => {
@@ -214,7 +214,7 @@ const Register = () => {
                 }
             });
 
-            await axios.post('http://localhost:5000/api/users/register', formDataToSend, {
+            await api.post('http://localhost:5000/api/users/register', formDataToSend, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 

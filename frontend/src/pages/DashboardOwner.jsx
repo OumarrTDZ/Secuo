@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "api";
 import OwnerSpaceCard from "../components/OwnerSpaceCard.jsx";
 import "../styles/pages/ownerDashboard.css";
 import { FiPlus, FiHome } from 'react-icons/fi';
@@ -19,7 +19,7 @@ const DashboardOwner = () => {
         }
 
         try {
-            const { data } = await axios.get("http://localhost:5000/api/users/getOwnerDashboard", {
+            const { data } = await api.get("http://localhost:5000/api/users/getOwnerDashboard", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUser(data.user);

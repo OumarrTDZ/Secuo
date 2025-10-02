@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from 'api';
 import '../styles/pages/createSpace.css';
 import '../styles/components/forms.css';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -42,7 +42,7 @@ const EditSpace = () => {
             }
 
             try {
-                const response = await axios.get(`http://localhost:5000/api/spaces/${id}`, {
+                const response = await api.get(`http://localhost:5000/api/spaces/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -90,7 +90,7 @@ const EditSpace = () => {
 
     const handleDeleteImage = async (imagePath) => {
         try {
-            await axios.patch(`http://localhost:5000/api/spaces/${id}`, {
+            await api.patch(`http://localhost:5000/api/spaces/${id}`, {
                 imageToDelete: imagePath
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -105,7 +105,7 @@ const EditSpace = () => {
 
     const handleDeleteDocument = async (docPath) => {
         try {
-            await axios.patch(`http://localhost:5000/api/spaces/${id}`, {
+            await api.patch(`http://localhost:5000/api/spaces/${id}`, {
                 documentToDelete: docPath
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -127,7 +127,7 @@ const EditSpace = () => {
 
         try {
             // Update space details
-            await axios.patch(`http://localhost:5000/api/spaces/${id}`, formData, {
+            await api.patch(`http://localhost:5000/api/spaces/${id}`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -143,7 +143,7 @@ const EditSpace = () => {
                     uploadData.append('validationDocuments', file);
                 });
 
-                await axios.post(`http://localhost:5000/api/spaces/${id}/upload`, uploadData, {
+                await api.post(`http://localhost:5000/api/spaces/${id}/upload`, uploadData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${token}`,

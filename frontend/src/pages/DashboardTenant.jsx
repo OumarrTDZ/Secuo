@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "api";
 import TenantSpaces from "../components/TenantSpaces.jsx";
 
 const DashboardTenant = () => {
@@ -19,7 +19,7 @@ const DashboardTenant = () => {
         }
 
         try {
-            const { data } = await axios.get("http://localhost:5000/api/users/getTenantDashboard", {
+            const { data } = await api.get("http://localhost:5000/api/users/getTenantDashboard", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "api";
 import ReusableDropzone from "../components/ReusableDropzone";
 import "../styles/components/forms.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -32,7 +32,7 @@ const EditProfile = () => {
         const fetchProfile = async () => {
             try {
                 const token = localStorage.getItem("userToken");
-                const { data } = await axios.get("http://localhost:5000/api/users/profile", {
+                const { data } = await api.get("http://localhost:5000/api/users/profile", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setUser(data.user);
@@ -89,7 +89,7 @@ const EditProfile = () => {
             if (newDniFront) formData.append('idFrontPhoto', newDniFront);
             if (newDniBack) formData.append('idBackPhoto', newDniBack);
 
-            await axios.patch(`http://localhost:5000/api/users/${user._id}/edit`, formData, {
+            await api.patch(`http://localhost:5000/api/users/${user._id}/edit`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     Authorization: `Bearer ${token}`,

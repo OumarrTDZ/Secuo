@@ -24,7 +24,7 @@ import EditSpace from "./pages/EditSpace.jsx";
 import Navbar from './components/Navbar';
 import SidebarLeft from './components/SidebarLeft';
 import SidebarRight from './components/SidebarRight';
-import axios from 'axios';
+import api from 'api';
 
 // Layout for usual users
 const UserLayout = ({ children }) => {
@@ -41,7 +41,7 @@ const UserLayout = ({ children }) => {
         }
 
         try {
-            const { data } = await axios.get('http://localhost:5000/api/users/profile', {
+            const { data } = await api.get('http://localhost:5000/api/users/profile', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUser(data.user);

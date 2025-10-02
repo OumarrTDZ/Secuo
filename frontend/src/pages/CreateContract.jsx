@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from 'api';
 import ImageDropZone from '../components/ImageDropZone';
 import '../styles/components/forms.css';
 
@@ -56,7 +56,7 @@ const CreateContract = () => {
             console.log('Sending contract data:', dataToSend);
 
             // Create contract
-            const contractResponse = await axios.post(
+            const contractResponse = await api.post(
                 'http://localhost:5000/api/contracts',
                 dataToSend,
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -71,7 +71,7 @@ const CreateContract = () => {
                     documentsData.append('contractDocument', file);
                 });
 
-                await axios.post(
+                await api.post(
                     `http://localhost:5000/api/contracts/${contractId}/upload`,
                     documentsData,
                     {

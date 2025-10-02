@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from 'api';
 import '../styles/pages/createSpace.css';
 import '../styles/components/forms.css';
 import { useNavigate } from 'react-router-dom';
@@ -56,7 +56,7 @@ const CreateSpace = () => {
 
         try {
             // Create space
-            const spaceResponse = await axios.post('http://localhost:5000/api/spaces', formData, {
+            const spaceResponse = await api.post('http://localhost:5000/api/spaces', formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -76,7 +76,7 @@ const CreateSpace = () => {
                     uploadData.append('validationDocuments', file);
                 });
 
-                await axios.post(`http://localhost:5000/api/spaces/${spaceId}/upload`, uploadData, {
+                await api.post(`http://localhost:5000/api/spaces/${spaceId}/upload`, uploadData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${token}`,

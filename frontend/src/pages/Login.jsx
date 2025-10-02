@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from 'api';
 import { AuthContext } from '../context/AuthContext';
 import { usePreference } from '../context/PreferenceContext';
 import logo from '../assets/logo.png';
@@ -18,7 +18,7 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const { data } = await axios.post('http://localhost:5000/api/users/login', { dni, password });
+            const { data } = await api.post('http://localhost:5000/api/users/login', { dni, password });
 
             const { token, user } = data;
 

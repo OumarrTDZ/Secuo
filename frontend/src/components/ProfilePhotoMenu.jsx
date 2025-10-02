@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import "../styles/components/profilePhotoMenu.css";
-import axios from "axios";
+import api from "api";
 
 const ProfilePhotoMenu = ({ user, onUpdate, onClose }) => {
     // State to hold the new selected photo file
@@ -25,7 +25,7 @@ const ProfilePhotoMenu = ({ user, onUpdate, onClose }) => {
 
         try {
             const token = localStorage.getItem("userToken"); // 🔐 Auth token from login
-            await axios.post(
+            await api.post(
                 `http://localhost:5000/api/users/upload-profile/${user.dni}`,
                 formData,
                 {
@@ -46,7 +46,7 @@ const ProfilePhotoMenu = ({ user, onUpdate, onClose }) => {
     const handleDelete = async () => {
         try {
             const token = localStorage.getItem("userToken");
-            await axios.delete(
+            await api.delete(
                 `http://localhost:5000/api/users/${user._id}/profilePhoto`,
                 {
                     headers: {

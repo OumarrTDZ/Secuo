@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import api from "api";
 import '../styles/spaceDetails.css';
 import ImageCarousel from "../components/ImageCarousel";
 import { FiPlus, FiEdit2, FiTrash2, FiArrowLeft } from 'react-icons/fi';
@@ -18,7 +18,7 @@ const SpaceDetails = () => {
         const fetchSpaceDetails = async () => {
             try {
                 const token = localStorage.getItem('userToken');
-                const { data } = await axios.get(`http://localhost:5000/api/spaces/${id}`, {
+                const { data } = await api.get(`http://localhost:5000/api/spaces/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSpace(data.space);
@@ -27,7 +27,7 @@ const SpaceDetails = () => {
                 const contractsData = data.contracts;
                 const tenantPromises = contractsData.map(async (contract) => {
                     try {
-                        const userResponse = await axios.get(`http://localhost:5000/api/users/profile/${contract.tenantDni}`, {
+                        const userResponse = await api.get(`http://localhost:5000/api/users/profile/${contract.tenantDni}`, {
                             headers: { Authorization: `Bearer ${token}` }
                         });
                         return {
@@ -74,7 +74,7 @@ const SpaceDetails = () => {
 
         try {
             const token = localStorage.getItem('userToken');
-            await axios.delete(`http://localhost:5000/api/spaces/${id}`, {
+            await api.delete(`http://localhost:5000/api/spaces/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             navigate('/dashboard-owner');
@@ -91,7 +91,7 @@ const SpaceDetails = () => {
 
         try {
             const token = localStorage.getItem('userToken');
-            await axios.delete(`http://localhost:5000/api/contracts/${contractId}`, {
+            await api.delete(`http://localhost:5000/api/contracts/${contractId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from 'api';
 import { FiArrowLeft, FiUserCheck, FiHome, FiFileText, FiCheckSquare } from 'react-icons/fi';
 import ReviewSidebar from '../components/ReviewSidebar';
 
@@ -22,7 +22,7 @@ const AdminValidation = () => {
                     return;
                 }
 
-                const { data } = await axios.get('http://localhost:5000/api/admins/check', {
+                const { data } = await api.get('http://localhost:5000/api/admins/check', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -45,9 +45,9 @@ const AdminValidation = () => {
         try {
             const config = { headers: { Authorization: `Bearer ${token}` } };
 
-            const usersRes = await axios.get('http://localhost:5000/api/users/pending', config);
-            const spacesRes = await axios.get('http://localhost:5000/api/spaces/pending', config);
-            const contractsRes = await axios.get('http://localhost:5000/api/contracts/pending', config);
+            const usersRes = await api.get('http://localhost:5000/api/users/pending', config);
+            const spacesRes = await api.get('http://localhost:5000/api/spaces/pending', config);
+            const contractsRes = await api.get('http://localhost:5000/api/contracts/pending', config);
 
             setUsers(usersRes.data.users);
             setSpaces(spacesRes.data);
@@ -64,17 +64,17 @@ const AdminValidation = () => {
 
             switch (type) {
                 case 'user':
-                    await axios.patch(`http://localhost:5000/api/users/${id}/validate`, 
+                    await api.patch(`http://localhost:5000/api/users/${id}/validate`, 
                         { validationStatus: status }, config);
                     setUsers(users.filter(user => user._id !== id));
                     break;
                 case 'space':
-                    await axios.patch(`http://localhost:5000/api/spaces/${id}/validate`,
+                    await api.patch(`http://localhost:5000/api/spaces/${id}/validate`,
                         { validationStatus: status }, config);
                     setSpaces(spaces.filter(space => space._id !== id));
                     break;
                 case 'contract':
-                    await axios.patch(`http://localhost:5000/api/contracts/${id}/validate`,
+                    await api.patch(`http://localhost:5000/api/contracts/${id}/validate`,
                         { validationStatus: status }, config);
                     setContracts(contracts.filter(contract => contract._id !== id));
                     break;

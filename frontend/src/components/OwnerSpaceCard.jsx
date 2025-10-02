@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "api";
 import ImageCarousel from "./ImageCarousel";
 import "../styles/components/ownerSpaceCard.css";
 import "../styles/components/imageCarousel.css";
@@ -57,7 +57,7 @@ const OwnerSpaceCard = ({ space, onDelete }) => {
 
         try {
             const token = localStorage.getItem('userToken');
-            await axios.delete(`http://localhost:5000/api/spaces/${space._id}`, {
+            await api.delete(`http://localhost:5000/api/spaces/${space._id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             

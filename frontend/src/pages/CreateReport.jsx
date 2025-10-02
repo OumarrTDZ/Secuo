@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from 'api';
 import { useNavigate, useParams } from 'react-router-dom';
 import ImageDropZone from '../components/ImageDropZone';
 import '../styles/components/forms.css';
@@ -40,7 +40,7 @@ const CreateReport = () => {
 
         try {
             // Create report with spaceId in the body
-            const reportResponse = await axios.post(
+            const reportResponse = await api.post(
                 'http://localhost:5000/api/reports',
                 { ...formData, spaceId },
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -55,7 +55,7 @@ const CreateReport = () => {
                     imagesData.append('attachments', file);
                 });
 
-                await axios.post(
+                await api.post(
                     `http://localhost:5000/api/reports/${reportId}/images`,
                     imagesData,
                     {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import api from 'api';
 import socket from '../socket/socket';
 import { usePreference } from '../context/PreferenceContext';
 import '../styles/components/sidebarLeft.css';
@@ -53,7 +53,7 @@ const SidebarLeft = () => {
             if (!token) return;
 
             lastFetchTime.current = now;
-            const { data } = await axios.get('http://localhost:5000/api/notifications/unread', {
+            const { data } = await api.get('http://localhost:5000/api/notifications/unread', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -70,7 +70,7 @@ const SidebarLeft = () => {
             const token = localStorage.getItem('userToken');
             if (!token) return;
 
-            const { data } = await axios.get('http://localhost:5000/api/notifications', {
+            const { data } = await api.get('http://localhost:5000/api/notifications', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -87,10 +87,10 @@ const SidebarLeft = () => {
             if (!token) return;
 
             const [ownerResponse, tenantResponse] = await Promise.all([
-                axios.get('http://localhost:5000/api/reports', {
+                api.get('http://localhost:5000/api/reports', {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                axios.get('http://localhost:5000/api/reports/my-reports', {
+                api.get('http://localhost:5000/api/reports/my-reports', {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
@@ -189,7 +189,7 @@ const SidebarLeft = () => {
             const token = localStorage.getItem('userToken');
             if (!token) return;
 
-            await axios.post('http://localhost:5000/api/notifications/mark-all-read', {}, {
+            await api.post('http://localhost:5000/api/notifications/mark-all-read', {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -233,7 +233,7 @@ const SidebarLeft = () => {
                 return;
             }
 
-            const response = await axios.patch(
+            const response = await api.patch(
                 `http://localhost:5000/api/reports/${reportId}/status`,
                 { status: newStatus },
                 { 
