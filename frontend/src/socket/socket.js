@@ -17,7 +17,8 @@ const initializeSocket = () => {
     console.log('[Socket] Initializing with:', { hasToken: !!token, hasUser: !!user });
 
     // Configure socket connection options
-    const newSocket = io('http://localhost:5000', {
+    const socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    const newSocket = io(socketUrl, {
         reconnection: true,
         reconnectionAttempts: Infinity,
         reconnectionDelay: 1000,

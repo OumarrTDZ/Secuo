@@ -18,7 +18,7 @@ const AdminLogin = () => {
         e.preventDefault();
 
         try {
-            const response = await api.post('http://localhost:5000/api/admins/login', formData);
+            const response = await api.post('/api/admins/login', formData);
             localStorage.setItem('adminToken', response.data.token);
             navigate('/admin-dashboard');
         } catch (error) {
@@ -84,3 +84,4 @@ const AdminLogin = () => {
 };
 
 export default AdminLogin;
+

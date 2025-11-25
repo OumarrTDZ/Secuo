@@ -57,7 +57,7 @@ const CreateContract = () => {
 
             // Create contract
             const contractResponse = await api.post(
-                'http://localhost:5000/api/contracts',
+                '/api/contracts',
                 dataToSend,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -72,7 +72,7 @@ const CreateContract = () => {
                 });
 
                 await api.post(
-                    `http://localhost:5000/api/contracts/${contractId}/upload`,
+                    `/api/contracts/${contractId}/upload`,
                     documentsData,
                     {
                         headers: {
@@ -220,3 +220,4 @@ const CreateContract = () => {
 };
 
 export default CreateContract;
+

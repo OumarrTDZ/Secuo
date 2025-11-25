@@ -57,7 +57,7 @@ const OwnerSpaceCard = ({ space, onDelete }) => {
 
         try {
             const token = localStorage.getItem('userToken');
-            await api.delete(`http://localhost:5000/api/spaces/${space._id}`, {
+            await api.delete(`/api/spaces/${space._id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -175,3 +175,4 @@ const OwnerSpaceCard = ({ space, onDelete }) => {
 };
 
 export default OwnerSpaceCard;
+

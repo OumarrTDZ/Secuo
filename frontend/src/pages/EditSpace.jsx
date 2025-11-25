@@ -42,7 +42,7 @@ const EditSpace = () => {
             }
 
             try {
-                const response = await api.get(`http://localhost:5000/api/spaces/${id}`, {
+                const response = await api.get(`/api/spaces/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
@@ -90,7 +90,7 @@ const EditSpace = () => {
 
     const handleDeleteImage = async (imagePath) => {
         try {
-            await api.patch(`http://localhost:5000/api/spaces/${id}`, {
+            await api.patch(`/api/spaces/${id}`, {
                 imageToDelete: imagePath
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -105,7 +105,7 @@ const EditSpace = () => {
 
     const handleDeleteDocument = async (docPath) => {
         try {
-            await api.patch(`http://localhost:5000/api/spaces/${id}`, {
+            await api.patch(`/api/spaces/${id}`, {
                 documentToDelete: docPath
             }, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -127,7 +127,7 @@ const EditSpace = () => {
 
         try {
             // Update space details
-            await api.patch(`http://localhost:5000/api/spaces/${id}`, formData, {
+            await api.patch(`/api/spaces/${id}`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -143,7 +143,7 @@ const EditSpace = () => {
                     uploadData.append('validationDocuments', file);
                 });
 
-                await api.post(`http://localhost:5000/api/spaces/${id}/upload`, uploadData, {
+                await api.post(`/api/spaces/${id}/upload`, uploadData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${token}`,
@@ -267,7 +267,7 @@ const EditSpace = () => {
                             <div className="existing-images">
                                 {existingGallery.map((image, index) => (
                                     <div key={index} className="existing-image">
-                                        <img src={`http://localhost:5000${image}`} alt={`Space ${index + 1}`} />
+                                        <img src={`${image}`} alt={`Space ${index + 1}`} />
                                         <button 
                                             type="button" 
                                             onClick={() => handleDeleteImage(image)}

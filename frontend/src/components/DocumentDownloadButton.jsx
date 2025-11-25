@@ -7,7 +7,7 @@ const DocumentDownloadButton = ({ documents, type, id }) => {
     }
 
     const getDocumentUrl = (document) => {
-        const baseUrl = 'http://localhost:5000';
+        const baseUrl = '';
         if (document.startsWith('/uploads/')) {
             return `${baseUrl}${document}`;
         }

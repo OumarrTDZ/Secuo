@@ -34,7 +34,7 @@ const TenantSpaceDetails = () => {
                     return;
                 }
                 console.log('Making API request...');
-                const { data } = await api.get(`http://localhost:5000/api/spaces/${id}`, {
+                const { data } = await api.get(`/api/spaces/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 

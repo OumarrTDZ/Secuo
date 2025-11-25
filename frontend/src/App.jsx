@@ -41,7 +41,7 @@ const UserLayout = ({ children }) => {
         }
 
         try {
-            const { data } = await api.get('http://localhost:5000/api/users/profile', {
+            const { data } = await api.get('/api/users/profile', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUser(data.user);
@@ -148,4 +148,5 @@ function App() {
 }
 
 export default App;
+
 

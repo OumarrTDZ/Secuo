@@ -52,7 +52,7 @@ const SidebarRight = ({ user, reloadUser }) => {
                         onClick={() => setShowMenu(!showMenu)} 
                     >
                         <Avatar
-                            src={user?.profilePhoto ? `http://localhost:5000${user.profilePhoto}` : undefined}
+                            src={user?.profilePhoto ? `${user.profilePhoto}` : undefined}
                             size={120}
                         />
                         <div className="avatar-overlay">
@@ -126,3 +126,4 @@ const SidebarRight = ({ user, reloadUser }) => {
 };
 
 export default SidebarRight;
+

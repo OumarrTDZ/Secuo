@@ -53,7 +53,7 @@ const SidebarLeft = () => {
             if (!token) return;
 
             lastFetchTime.current = now;
-            const { data } = await api.get('http://localhost:5000/api/notifications/unread', {
+            const { data } = await api.get('/api/notifications/unread', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -70,7 +70,7 @@ const SidebarLeft = () => {
             const token = localStorage.getItem('userToken');
             if (!token) return;
 
-            const { data } = await api.get('http://localhost:5000/api/notifications', {
+            const { data } = await api.get('/api/notifications', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -87,10 +87,10 @@ const SidebarLeft = () => {
             if (!token) return;
 
             const [ownerResponse, tenantResponse] = await Promise.all([
-                api.get('http://localhost:5000/api/reports', {
+                api.get('/api/reports', {
                     headers: { Authorization: `Bearer ${token}` }
                 }),
-                api.get('http://localhost:5000/api/reports/my-reports', {
+                api.get('/api/reports/my-reports', {
                     headers: { Authorization: `Bearer ${token}` }
                 })
             ]);
@@ -189,7 +189,7 @@ const SidebarLeft = () => {
             const token = localStorage.getItem('userToken');
             if (!token) return;
 
-            await api.post('http://localhost:5000/api/notifications/mark-all-read', {}, {
+            await api.post('/api/notifications/mark-all-read', {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
@@ -234,7 +234,7 @@ const SidebarLeft = () => {
             }
 
             const response = await api.patch(
-                `http://localhost:5000/api/reports/${reportId}/status`,
+                `/api/reports/${reportId}/status`,
                 { status: newStatus },
                 { 
                     headers: { 
@@ -465,9 +465,9 @@ const SidebarLeft = () => {
                                                     {report.attachments.map((attachment, index) => (
                                                         <img
                                                             key={index}
-                                                            src={`http://localhost:5000${attachment}`}
+                                                            src={`${attachment}`}
                                                             alt={`Image ${index + 1}`}
-                                                            onClick={() => window.open(`http://localhost:5000${attachment}`, '_blank')}
+                                                            onClick={() => window.open(`${attachment}`, '_blank')}
                                                         />
                                                     ))}
                                                 </div>
@@ -501,3 +501,4 @@ const SidebarLeft = () => {
 };
 
 export default SidebarLeft;
+

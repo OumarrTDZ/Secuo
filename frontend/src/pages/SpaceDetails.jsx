@@ -18,7 +18,7 @@ const SpaceDetails = () => {
         const fetchSpaceDetails = async () => {
             try {
                 const token = localStorage.getItem('userToken');
-                const { data } = await api.get(`http://localhost:5000/api/spaces/${id}`, {
+                const { data } = await api.get(`/api/spaces/${id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setSpace(data.space);
@@ -27,7 +27,7 @@ const SpaceDetails = () => {
                 const contractsData = data.contracts;
                 const tenantPromises = contractsData.map(async (contract) => {
                     try {
-                        const userResponse = await api.get(`http://localhost:5000/api/users/profile/${contract.tenantDni}`, {
+                        const userResponse = await api.get(`/api/users/profile/${contract.tenantDni}`, {
                             headers: { Authorization: `Bearer ${token}` }
                         });
                         return {
@@ -74,7 +74,7 @@ const SpaceDetails = () => {
 
         try {
             const token = localStorage.getItem('userToken');
-            await api.delete(`http://localhost:5000/api/spaces/${id}`, {
+            await api.delete(`/api/spaces/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             navigate('/dashboard-owner');
@@ -91,7 +91,7 @@ const SpaceDetails = () => {
 
         try {
             const token = localStorage.getItem('userToken');
-            await api.delete(`http://localhost:5000/api/contracts/${contractId}`, {
+            await api.delete(`/api/contracts/${contractId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -275,3 +275,4 @@ const SpaceDetails = () => {
 };
 
 export default SpaceDetails;
+

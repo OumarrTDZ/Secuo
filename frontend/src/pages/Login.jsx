@@ -18,7 +18,7 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const { data } = await api.post('http://localhost:5000/api/users/login', { dni, password });
+            const { data } = await api.post('/api/users/login', { dni, password });
 
             const { token, user } = data;
 
@@ -110,3 +110,4 @@ const Login = () => {
 };
 
 export default Login;
+

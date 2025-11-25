@@ -20,7 +20,7 @@ const ReusableDropzone = ({ label, onFileAccepted, existingFileUrl }) => {
 
     // Effect to set initial preview if there's already an existing image URL
     useEffect(() => {
-        if (existingFileUrl) setPreview(`http://localhost:5000${existingFileUrl}`);
+        if (existingFileUrl) setPreview(`${existingFileUrl}`);
     }, [existingFileUrl]);
 
     return (
@@ -40,3 +40,4 @@ const ReusableDropzone = ({ label, onFileAccepted, existingFileUrl }) => {
 };
 
 export default ReusableDropzone;
+

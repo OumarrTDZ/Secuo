@@ -19,7 +19,7 @@ const DashboardTenant = () => {
         }
 
         try {
-            const { data } = await api.get("http://localhost:5000/api/users/getTenantDashboard", {
+            const { data } = await api.get("/api/users/getTenantDashboard", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             
@@ -54,3 +54,4 @@ const DashboardTenant = () => {
 };
 
 export default DashboardTenant;
+

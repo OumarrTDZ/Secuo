@@ -214,7 +214,7 @@ const Register = () => {
                 }
             });
 
-            await api.post('http://localhost:5000/api/users/register', formDataToSend, {
+            await api.post('/api/users/register', formDataToSend, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
 
@@ -303,3 +303,4 @@ const Register = () => {
 };
 
 export default Register;
+

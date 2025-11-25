@@ -43,7 +43,7 @@ const EditContract = () => {
                 console.log('Fetching contract with ID:', id);
                 
                 const response = await api.get(
-                    `http://localhost:5000/api/contracts/${id}`,
+                    `/api/contracts/${id}`,
                     { 
                         headers: { 
                             Authorization: `Bearer ${token}`
@@ -158,7 +158,7 @@ const EditContract = () => {
             
             // Update contract to remove the document
             await api.patch(
-                `http://localhost:5000/api/contracts/${id}`,
+                `/api/contracts/${id}`,
                 { documentToDelete: fileName },
                 { 
                     headers: { 
@@ -180,7 +180,7 @@ const EditContract = () => {
     const handleDownloadDocument = (documentPath) => {
         // Create a temporary link to download the file
         const link = document.createElement('a');
-        link.href = `http://localhost:5000${documentPath}`;
+        link.href = `${documentPath}`;
         link.target = '_blank';
         document.body.appendChild(link);
         link.click();
@@ -196,7 +196,7 @@ const EditContract = () => {
             
             // Update contract details
             const response = await api.patch(
-                `http://localhost:5000/api/contracts/${id}`,
+                `/api/contracts/${id}`,
                 formData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -211,7 +211,7 @@ const EditContract = () => {
                 });
 
                 await api.post(
-                    `http://localhost:5000/api/contracts/${id}/upload`,
+                    `/api/contracts/${id}/upload`,
                     documentsData,
                     {
                         headers: {
@@ -422,3 +422,4 @@ const EditContract = () => {
 };
 
 export default EditContract;
+

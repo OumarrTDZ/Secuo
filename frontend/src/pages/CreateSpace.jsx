@@ -56,7 +56,7 @@ const CreateSpace = () => {
 
         try {
             // Create space
-            const spaceResponse = await api.post('http://localhost:5000/api/spaces', formData, {
+            const spaceResponse = await api.post('/api/spaces', formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -76,7 +76,7 @@ const CreateSpace = () => {
                     uploadData.append('validationDocuments', file);
                 });
 
-                await api.post(`http://localhost:5000/api/spaces/${spaceId}/upload`, uploadData, {
+                await api.post(`/api/spaces/${spaceId}/upload`, uploadData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         Authorization: `Bearer ${token}`,
@@ -279,3 +279,4 @@ const CreateSpace = () => {
 };
 
 export default CreateSpace;
+

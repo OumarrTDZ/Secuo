@@ -31,17 +31,17 @@ const ImageCarousel = ({ images = [], spaceId }) => {
                     return image.url;
                 }
                 // Otherwise prepend backend base URL
-                return `http://localhost:5000${image.url}`;
+                return `${image.url}`;
             }
 
             // If it's a string, treat it as a filename
             if (typeof image === 'string') {
-                return `http://localhost:5000/uploads/spaces/${spaceId}/gallery/${image}`;
+                return `/uploads/spaces/${spaceId}/gallery/${image}`;
             }
 
             // Try to use other possible filename fields
             const filename = image?.filename || image?.name || 'default.jpg';
-            return `http://localhost:5000/uploads/spaces/${spaceId}/gallery/${filename}`;
+            return `/uploads/spaces/${spaceId}/gallery/${filename}`;
         } catch (error) {
             console.error('Error getting image URL:', error);
             return '/assets/defaultSpace.png';
@@ -96,3 +96,4 @@ const ImageCarousel = ({ images = [], spaceId }) => {
 };
 
 export default ImageCarousel;
+

@@ -26,7 +26,7 @@ const ProfilePhotoMenu = ({ user, onUpdate, onClose }) => {
         try {
             const token = localStorage.getItem("userToken"); // 🔐 Auth token from login
             await api.post(
-                `http://localhost:5000/api/users/upload-profile/${user.dni}`,
+                `/api/users/upload-profile/${user.dni}`,
                 formData,
                 {
                     headers: {
@@ -47,7 +47,7 @@ const ProfilePhotoMenu = ({ user, onUpdate, onClose }) => {
         try {
             const token = localStorage.getItem("userToken");
             await api.delete(
-                `http://localhost:5000/api/users/${user._id}/profilePhoto`,
+                `/api/users/${user._id}/profilePhoto`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`
@@ -92,3 +92,4 @@ const ProfilePhotoMenu = ({ user, onUpdate, onClose }) => {
 };
 
 export default ProfilePhotoMenu;
+

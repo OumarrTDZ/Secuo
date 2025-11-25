@@ -26,7 +26,7 @@ const DocumentCarousel = ({ documents, type, id }) => {
             return '/assets/defaultDocument.png';
         }
 
-        const baseUrl = 'http://localhost:5000';
+        const baseUrl = '';
 
         // If document is an object with a path property, use that
         if (typeof document === 'object' && document.path) {

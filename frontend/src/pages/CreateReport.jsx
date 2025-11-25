@@ -41,7 +41,7 @@ const CreateReport = () => {
         try {
             // Create report with spaceId in the body
             const reportResponse = await api.post(
-                'http://localhost:5000/api/reports',
+                '/api/reports',
                 { ...formData, spaceId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -56,7 +56,7 @@ const CreateReport = () => {
                 });
 
                 await api.post(
-                    `http://localhost:5000/api/reports/${reportId}/images`,
+                    `/api/reports/${reportId}/images`,
                     imagesData,
                     {
                         headers: {

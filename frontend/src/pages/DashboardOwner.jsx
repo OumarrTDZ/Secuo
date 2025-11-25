@@ -19,7 +19,7 @@ const DashboardOwner = () => {
         }
 
         try {
-            const { data } = await api.get("http://localhost:5000/api/users/getOwnerDashboard", {
+            const { data } = await api.get("/api/users/getOwnerDashboard", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setUser(data.user);
@@ -87,3 +87,4 @@ const DashboardOwner = () => {
 };
 
 export default DashboardOwner;
+
