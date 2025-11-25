@@ -6,13 +6,33 @@ const mongoose = require('./config/db'); // MongoDB connection
 const socketHandler = require('./socketHandler'); // WebSockets handler
 const path = require('path');
 const createUploadDirectories = require('./utils/initializeUploadDirs');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*", methods: ["GET", "POST"] } });
+
+// CORS Configuration
+// Allow requests from Vercel (Frontend) and Localhost (Development)
+const allowedOrigins = [
+    "https://secuo-rho.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5000"
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) === -1) {
+            const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+            return callback(new Error(msg), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true
+}));
 
 app.use(express.json());
-app.use(require('cors')());
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -21,6 +41,11 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/uploads', (req, res, next) => {
     console.log('Static file request:', req.url);
     next();
+});
+
+// Health Check Route (Important for Render)
+app.get('/', (req, res) => {
+    res.status(200).send('API is running...');
 });
 
 // Import routes
@@ -39,6 +64,15 @@ app.use('/api/contracts', contractRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/chatGroups', chatGroupRoutes);
 app.use('/api/notifications', notificationRoutes);
+
+// Socket.io Setup
+const io = new Server(server, {
+    cors: {
+        origin: allowedOrigins,
+        methods: ["GET", "POST"],
+        credentials: true
+    }
+});
 
 // Make io available to our controllers
 app.set('io', io);
