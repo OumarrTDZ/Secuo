@@ -87,7 +87,7 @@ const DNIUpload = ({ onFileChange }) => {
     return (
         <div className="dni-upload-container">
             {[{ side: 'front', label: 'Front of DNI', preview: previews.idFrontPhoto },
-                { side: 'back', label: 'Back of DNI', preview: previews.idBackPhoto }].map(({ side, label, preview }) => (
+            { side: 'back', label: 'Back of DNI', preview: previews.idBackPhoto }].map(({ side, label, preview }) => (
                 <div className="dni-upload-side" key={side}>
                     <h4>{label}</h4>
                     <div
@@ -221,7 +221,7 @@ const Register = () => {
             setSuccess('Registration successful! Redirecting to login...');
             setTimeout(() => navigate('/login'), 2000);
         } catch (error) {
-            setError(error.response?.data?.error || 'Registration error. Please try again.');
+            setError(error.response?.data?.error || 'Registration error. Please try again.' + error);
         }
     };
 
