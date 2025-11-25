@@ -42,7 +42,7 @@ const Login = () => {
                 navigate('/dashboard-owner');
             }
         } catch (error) {
-            setErrorMessage(error.response?.data?.error || "Login failed.");
+            setErrorMessage(error.response?.data?.error || "Login failed, Error: " + error);
         }
     };
 
